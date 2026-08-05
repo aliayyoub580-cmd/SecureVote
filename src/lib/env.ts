@@ -2,6 +2,7 @@ export type PublicEnv = {
   supabaseUrl: string
   supabaseAnonKey: string
   turnstileSiteKey: string | undefined
+  frontendUrl: string
   isProduction: boolean
   strictEnv: boolean
 }
@@ -20,6 +21,9 @@ export function getPublicEnv(): PublicEnv {
   const supabaseAnonKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim()
   const turnstileRaw = String(import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '').trim()
   const turnstileSiteKey = turnstileRaw.length > 0 ? turnstileRaw : undefined
+  const frontendUrl = String(
+    import.meta.env.VITE_FRONTEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173')
+  ).trim()
   const strictEnv = import.meta.env.VITE_STRICT_ENV === 'true'
   const isProduction = import.meta.env.PROD
 
@@ -34,6 +38,6 @@ export function getPublicEnv(): PublicEnv {
     }
   }
 
-  cached = { supabaseUrl, supabaseAnonKey, turnstileSiteKey, isProduction, strictEnv }
+  cached = { supabaseUrl, supabaseAnonKey, turnstileSiteKey, frontendUrl, isProduction, strictEnv }
   return cached
 }
