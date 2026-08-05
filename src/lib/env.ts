@@ -1,0 +1,39 @@
+export type PublicEnv = {
+  supabaseUrl: string
+  supabaseAnonKey: string
+  turnstileSiteKey: string | undefined
+  isProduction: boolean
+  strictEnv: boolean
+}
+
+let cached: PublicEnv | null = null
+
+function isLikelyHttpUrl(s: string): boolean {
+  return /^https?:\/\/.+\..+/i.test(s)
+}
+
+/** Validates public (Vite) env. Safe to call multiple times. */
+export function getPublicEnv(): PublicEnv {
+  if (cached) return cached
+
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? '').trim()
+  const supabaseAnonKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim()
+  const turnstileRaw = String(import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '').trim()
+  const turnstileSiteKey = turnstileRaw.length > 0 ? turnstileRaw : undefined
+  const strictEnv = import.meta.env.VITE_STRICT_ENV === 'true'
+  const isProduction = import.meta.env.PROD
+
+  if (isProduction && strictEnv) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error(
+        'Production misconfiguration: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, or disable VITE_STRICT_ENV.',
+      )
+    }
+    if (!isLikelyHttpUrl(supabaseUrl)) {
+      throw new Error('VITE_SUPABASE_URL must be a valid http(s) URL when VITE_STRICT_ENV is true.')
+    }
+  }
+
+  cached = { supabaseUrl, supabaseAnonKey, turnstileSiteKey, isProduction, strictEnv }
+  return cached
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage / Landing Page -->
+  <url>
+    <loc>https://securevote-election.vercel.app/</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+
+  <!-- Browse / Discover Elections -->
+  <url>
+    <loc>https://securevote-election.vercel.app/elections</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Login Page -->
+  <url>
+    <loc>https://securevote-election.vercel.app/login</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+
+  <!-- Register Page -->
+  <url>
+    <loc>https://securevote-election.vercel.app/register</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+
+  <!-- Forgot Password Page -->
+  <url>
+    <loc>https://securevote-election.vercel.app/auth/forgot-password</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.30</priority>
+  </url>
+</urlset>

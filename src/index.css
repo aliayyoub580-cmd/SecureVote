@@ -1,0 +1,305 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-border: var(--border);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-bg-page: var(--bg-page);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-card: var(--bg-card);
+  
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-success: var(--accent-success);
+  --color-accent-danger: var(--accent-danger);
+  --color-accent-info: var(--accent-info);
+  
+  --color-text-heading: var(--text-heading);
+  --color-text-body: var(--text-body);
+  --color-text-muted: var(--text-muted);
+
+  --radius-xl: 1.25rem;
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+}
+
+@layer base {
+  :root {
+    /* Deep Teal v2 — Light Theme */
+    --bg-page: #F1F8F7;
+    --bg-surface: #FFFFFF;
+    --bg-card: #FFFFFF;
+
+    --accent-primary: #0A7D6C;
+    --accent-secondary: #C17A3E;
+    --accent-success: #0FA77A;
+    --accent-success-light: #D9F8F0;
+    --accent-danger: #D4576D;
+    --accent-info: #5B93C8;
+
+    --text-heading: #0A2B33;
+    --text-body: #36545A;
+    --text-muted: #5C7A80;
+
+    --border: rgba(0, 0, 0, 0.08);
+
+    /* System Mappings */
+    --background: var(--bg-page);
+    --foreground: var(--text-heading);
+    --card: var(--bg-card);
+    --card-foreground: var(--text-heading);
+    --primary: var(--accent-primary);
+    --primary-foreground: #FFFFFF;
+    --muted: #E2EFF0;
+    --muted-foreground: var(--text-muted);
+    --radius: 0.75rem; /* 12px default */
+
+    --shadow-sm: 0 2px 8px rgba(10, 43, 51, 0.04);
+    --shadow-md: 0 8px 20px -4px rgba(10, 43, 51, 0.08);
+    --bg-gradient: #F1F8F7;
+  }
+
+  .dark {
+    /* Deep Teal v2 — Dark Theme (Default Government Security Mode) */
+    --bg-page: #031F28;
+    --bg-surface: #0B3541;
+    --bg-card: #0F4A5E;
+
+    --accent-primary: #2EE6B8;
+    --accent-secondary: #F5A15C;
+    --accent-success: #2FD9A5;
+    --accent-success-light: #5EEAD4;
+    --accent-danger: #E8637A;
+    --accent-info: #6FA8DC;
+
+    --text-heading: #EDF7F6;
+    --text-body: #C7DCDD;
+    --text-muted: #7FA3AB;
+
+    --border: rgba(255, 255, 255, 0.06);
+
+    /* System Mappings */
+    --background: var(--bg-page);
+    --foreground: var(--text-heading);
+    --card: var(--bg-card);
+    --card-foreground: var(--text-heading);
+    --primary: var(--accent-primary);
+    --primary-foreground: #031F28;
+    --muted: var(--bg-surface);
+    --muted-foreground: var(--text-muted);
+    --radius: 0.75rem; /* 12px */
+
+    --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 12px 28px -4px rgba(0, 0, 0, 0.35);
+    --bg-gradient: radial-gradient(circle at top left, #0B3541 0%, #062B35 35%, #031F28 100%);
+  }
+}
+
+@layer base {
+  body {
+    @apply antialiased overflow-x-hidden transition-colors duration-300;
+    background: var(--background);
+    color: var(--text-body);
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-heading);
+    @apply tracking-tight;
+  }
+}
+
+@layer components {
+  /* Headings */
+  .page-title {
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
+    color: var(--text-heading);
+  }
+  
+  .section-title {
+    @apply text-xl font-semibold tracking-tight;
+    color: var(--text-heading);
+  }
+
+  /* Deep Teal v2 — Cards */
+  .saas-card {
+    @apply relative overflow-hidden transition-all duration-300 ease-out;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 1.25rem; /* 20px */
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .saas-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* Deep Teal v2 — Buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: var(--accent-primary);
+    color: var(--primary-foreground);
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: 0 2px 8px rgba(46, 230, 184, 0.15);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    @apply -translate-y-0.5;
+    opacity: 0.92;
+    box-shadow: 0 6px 16px rgba(46, 230, 184, 0.25);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-200 bg-transparent border cursor-pointer disabled:opacity-50;
+    border-color: var(--border);
+    color: var(--accent-primary);
+    border-radius: 0.75rem;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: rgba(46, 230, 184, 0.08);
+    border-color: var(--accent-primary);
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-200 text-white cursor-pointer disabled:opacity-50;
+    background-color: var(--accent-danger);
+    border-radius: 0.75rem;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    @apply -translate-y-0.5;
+    opacity: 0.9;
+  }
+
+  /* Deep Teal v2 — Form Inputs */
+  .input-teal {
+    @apply h-12 px-4 text-sm font-medium transition-all duration-200 outline-none w-full;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem; /* 12px */
+    color: var(--text-heading);
+  }
+
+  .input-teal::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input-teal:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(46, 230, 184, 0.15);
+  }
+
+  /* Status Badges */
+  .badge-success {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    background-color: rgba(47, 217, 165, 0.15);
+    color: var(--accent-success);
+    border: 1px solid rgba(47, 217, 165, 0.25);
+  }
+  
+  .badge-warning {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    background-color: rgba(245, 161, 92, 0.15);
+    color: var(--accent-secondary);
+    border: 1px solid rgba(245, 161, 92, 0.25);
+  }
+  
+  .badge-error {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    background-color: rgba(232, 99, 122, 0.15);
+    color: var(--accent-danger);
+    border: 1px solid rgba(232, 99, 122, 0.25);
+  }
+
+  .badge-info {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    background-color: rgba(111, 168, 220, 0.15);
+    color: var(--accent-info);
+    border: 1px solid rgba(111, 168, 220, 0.25);
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    background-color: var(--bg-surface);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* Deep Teal v2 — Sidebar Items */
+  .sidebar-item {
+    @apply flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative;
+    color: var(--text-muted);
+  }
+  
+  .sidebar-item:hover {
+    color: var(--text-heading);
+    background-color: rgba(46, 230, 184, 0.06);
+  }
+  
+  .sidebar-item-active {
+    color: var(--accent-primary);
+    background-color: rgba(46, 230, 184, 0.12);
+    font-weight: 600;
+  }
+  
+  .sidebar-item-active::before {
+    content: '';
+    @apply absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full;
+    background-color: var(--accent-primary);
+  }
+
+  /* Deep Teal v2 — Table Styles */
+  .table-teal {
+    @apply w-full text-left text-sm border-collapse;
+  }
+
+  .table-teal th {
+    @apply px-4 py-3.5 text-xs font-semibold uppercase tracking-wider sticky top-0 z-10;
+    background-color: var(--bg-surface);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table-teal td {
+    @apply px-4 py-4 border-b border-[var(--border)] transition-colors;
+    color: var(--text-body);
+  }
+
+  .table-teal tr:hover td {
+    background-color: rgba(46, 230, 184, 0.03);
+  }
+}
+
+/* Background Depth Layer */
+.ambient-layer {
+  @apply fixed inset-0 pointer-events-none z-[-1];
+  background: var(--bg-gradient);
+}
+
+/* Base scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.no-scrollbar {
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE / Edge */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;               /* Chrome / Safari / Opera */
+}
