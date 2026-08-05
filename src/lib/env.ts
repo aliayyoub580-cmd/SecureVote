@@ -20,7 +20,16 @@ export function getPublicEnv(): PublicEnv {
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? '').trim()
   const supabaseAnonKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim()
   const turnstileRaw = String(import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '').trim()
-  const turnstileSiteKey = turnstileRaw.length > 0 ? turnstileRaw : undefined
+  
+  const isValidTurnstileKey =
+    turnstileRaw.length > 5 &&
+    !['undefined', 'null', 'false', 'none', 'your_site_key', 'your_turnstile_site_key'].includes(
+      turnstileRaw.toLowerCase()
+    ) &&
+    (turnstileRaw.startsWith('0x') || turnstileRaw.startsWith('1x') || turnstileRaw.length >= 20)
+
+  const turnstileSiteKey = isValidTurnstileKey ? turnstileRaw : undefined
+
   const frontendUrl = String(
     import.meta.env.VITE_FRONTEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173')
   ).trim()
