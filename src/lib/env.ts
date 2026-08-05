@@ -21,12 +21,13 @@ export function getPublicEnv(): PublicEnv {
   const supabaseAnonKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim()
   const turnstileRaw = String(import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '').trim()
   
+  // Cloudflare Turnstile site keys strictly start with 0x, 1x, 2x, or 3x
   const isValidTurnstileKey =
-    turnstileRaw.length > 5 &&
-    !['undefined', 'null', 'false', 'none', 'your_site_key', 'your_turnstile_site_key'].includes(
-      turnstileRaw.toLowerCase()
-    ) &&
-    (turnstileRaw.startsWith('0x') || turnstileRaw.startsWith('1x') || turnstileRaw.length >= 20)
+    turnstileRaw.length >= 10 &&
+    (turnstileRaw.startsWith('0x') ||
+      turnstileRaw.startsWith('1x') ||
+      turnstileRaw.startsWith('2x') ||
+      turnstileRaw.startsWith('3x'))
 
   const turnstileSiteKey = isValidTurnstileKey ? turnstileRaw : undefined
 
