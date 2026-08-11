@@ -42,7 +42,7 @@ export function AppSidebar({ collapsed, onToggle, onNavigate }: AppSidebarProps)
     { label: 'Elections', icon: Vote, path: ROUTES.adminElections },
     { label: 'Users', icon: Users, path: ROUTES.adminUsers },
     { label: 'Activity & Security', icon: Shield, path: ROUTES.adminAudit },
-    { label: 'Social Feed', icon: Rss, path: ROUTES.social },
+    { label: 'Social Feed | My Profile', icon: Rss, path: ROUTES.social },
     { label: 'Content Moderation', icon: Shield, path: ROUTES.adminSocialModeration },
     { label: 'Notifications', icon: Bell, path: ROUTES.notifications },
     { label: 'Settings', icon: Settings, path: ROUTES.settings },
@@ -51,14 +51,14 @@ export function AppSidebar({ collapsed, onToggle, onNavigate }: AppSidebarProps)
     { label: 'Elections', icon: ClipboardList, path: ROUTES.electionsManage },
     { label: 'Create Election', icon: PlusSquare, path: ROUTES.electionNew },
     { label: 'Results & Analytics', icon: Activity, path: ROUTES.creatorAnalytics || '/analytics' },
-    { label: 'Social Feed', icon: Rss, path: ROUTES.social },
+    { label: 'Social Feed | My Profile', icon: Rss, path: ROUTES.social },
     { label: 'Notifications', icon: Bell, path: ROUTES.notifications },
     { label: 'Settings', icon: Settings, path: ROUTES.settings },
   ] : [
     { label: 'Dashboard', icon: LayoutGrid, path: ROUTES.dashboard },
     { label: 'Browse Elections', icon: Vote, path: ROUTES.elections },
     { label: 'My Votes', icon: History, path: ROUTES.myVotes },
-    { label: 'Social Feed', icon: Rss, path: ROUTES.social },
+    { label: 'Social Feed | My Profile', icon: Rss, path: ROUTES.social },
     { label: 'Notifications', icon: Bell, path: ROUTES.notifications },
     { label: 'Settings', icon: Settings, path: ROUTES.settings },
   ]
@@ -74,7 +74,7 @@ export function AppSidebar({ collapsed, onToggle, onNavigate }: AppSidebarProps)
         </Link>
         {!collapsed && onToggle && (
           <Button variant="ghost" size="icon" className="size-8 text-[var(--text-muted)] hover:text-[var(--text-heading)]" onClick={onToggle}>
-             <ChevronLeft className="size-5" />
+            <ChevronLeft className="size-5" />
           </Button>
         )}
       </div>
@@ -83,7 +83,7 @@ export function AppSidebar({ collapsed, onToggle, onNavigate }: AppSidebarProps)
         {collapsed && onToggle && (
           <div className="flex justify-center mb-4">
             <Button variant="ghost" size="icon" className="size-8 text-[var(--text-muted)] hover:text-[var(--text-heading)]" onClick={onToggle}>
-               <ChevronRight className="size-5" />
+              <ChevronRight className="size-5" />
             </Button>
           </div>
         )}
@@ -113,7 +113,7 @@ export function AppSidebar({ collapsed, onToggle, onNavigate }: AppSidebarProps)
         {user ? (
           <div className={cn("flex items-center rounded-xl hover:bg-white/[0.04] transition-colors group cursor-pointer", collapsed ? "justify-center p-2" : "p-3 gap-3")} onClick={() => void signOut()} title={collapsed ? "Log Out" : undefined}>
             <div className="size-10 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center overflow-hidden shrink-0">
-               {profile?.full_name ? <span className="text-sm font-semibold text-[var(--foreground)]">{profile.full_name[0]}</span> : <User className="size-4 text-[var(--muted-foreground)]" />}
+              {profile?.full_name ? <span className="text-sm font-semibold text-[var(--foreground)]">{profile.full_name[0]}</span> : <User className="size-4 text-[var(--muted-foreground)]" />}
             </div>
             {!collapsed && (
               <>

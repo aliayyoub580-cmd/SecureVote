@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { RefreshCw, Rss, UserCheck, Globe, Plus, X } from 'lucide-react'
+import { RefreshCw, Rss, UserCheck, Plus, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { PostCard }             from '@/components/social/post-card'
@@ -10,20 +10,24 @@ import { AuthGuardModal, useAuthGuard } from '@/components/social/auth-guard-mod
 import { useSocialFeed }        from '@/hooks/use-social-feed'
 import { useAuth }              from '@/contexts/auth-context'
 import { socialInteractionsService } from '@/services/social.service'
-import { ROUTES } from '@/constants/routes'
 import type { FeedFilter } from '@/types/social'
 
-const FILTERS: { value: FeedFilter; label: string }[] = [
+const GUEST_FILTERS: { value: FeedFilter; label: string }[] = [
   { value: 'latest',           label: 'Latest'    },
-  { value: 'my_posts',         label: 'My Posts'  },
   { value: 'trending',         label: 'Trending'  },
-  { value: 'following',        label: 'Following' },
   { value: 'election_updates', label: 'Elections' },
 ]
 
 export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean }) {
   const { user } = useAuth()
-  const [filter,       setFilter]       = React.useState<FeedFilter>(myPostsOnly ? 'my_posts' : 'latest')
+  
+  // When user is logged in, default feed to 'my_posts' mode
+  const isUserLoggedIn = Boolean(user)
+  const activeMyPosts = isUserLoggedIn || myPostsOnly
+
+  const [filter, setFilter] = React.useState<FeedFilter>(
+    activeMyPosts ? 'my_posts' : 'latest'
+  )
   const [showComposer, setShowComposer] = React.useState(false)
 
   // Auth guard — used for interactions when not logged in
@@ -31,7 +35,7 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
 
   // Feed works for both guests (userId = undefined) and logged-in users
   const { posts, loading, hasMore, loadMore, refresh, optimisticLike, optimisticBookmark } =
-    useSocialFeed(user?.id, filter, myPostsOnly)
+    useSocialFeed(user?.id, activeMyPosts ? 'my_posts' : filter, activeMyPosts)
 
   const handleLike = (postId: string) => {
     guard('like this post', () => optimisticLike(postId))
@@ -78,12 +82,17 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
       )}
 
       {/* Header row */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-1">
         <div className="flex items-center gap-2">
           <Rss className="size-4 text-[var(--accent-primary)]" />
           <h2 className="text-base font-black text-[var(--foreground)] tracking-tight">
-            {filter === 'my_posts' || myPostsOnly ? 'My Posts' : 'Social Feed'}
+            {activeMyPosts ? 'My Posts' : 'Community Feed'}
           </h2>
+          {activeMyPosts && (
+            <span className="px-2.5 py-0.5 rounded-full bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border border-[var(--accent-primary)]/20 text-[10px] font-bold">
+              Created by you
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {user && (
@@ -106,7 +115,7 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
         </div>
       </div>
 
-      {/* Post Composer — only visible when logged-in user clicks Create Post */}
+      {/* Post Composer — visible when user clicks Create Post */}
       <AnimatePresence>
         {showComposer && user && (
           <motion.div
@@ -124,21 +133,13 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
         )}
       </AnimatePresence>
 
-      {/* Filter tabs */}
-      {!myPostsOnly && (
+      {/* Filter tabs — ONLY shown for guest visitors */}
+      {!user && (
         <div className="flex items-center gap-1 bg-[var(--card)] border border-[var(--border)] rounded-xl p-1">
-          {FILTERS.map(f => (
+          {GUEST_FILTERS.map(f => (
             <button
               key={f.value}
-              onClick={() => {
-                if (f.value === 'following') {
-                  guard('view posts from accounts you follow', () => setFilter('following'))
-                } else if (f.value === 'my_posts') {
-                  guard('view your created posts', () => setFilter('my_posts'))
-                } else {
-                  setFilter(f.value)
-                }
-              }}
+              onClick={() => setFilter(f.value)}
               className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 filter === f.value
                   ? 'bg-[var(--accent-primary)] text-[var(--primary-foreground)] shadow-xs'
@@ -151,7 +152,7 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
         </div>
       )}
 
-      {/* ── Posts: 2-column on md+, 1-column on mobile ── */}
+      {/* ── Posts Grid: 2-column on md+, 1-column on mobile ── */}
       {loading && posts.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -170,11 +171,11 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
         </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-16 text-[var(--muted-foreground)] bg-[var(--card)] rounded-2xl border border-[var(--border)]">
-          {myPostsOnly ? (
+          {activeMyPosts ? (
             <>
               <UserCheck className="size-10 mx-auto mb-3 opacity-40 text-[var(--accent-primary)]" />
-              <p className="font-bold text-[var(--foreground)] text-sm">No posts from you yet.</p>
-              <p className="text-xs mt-1">Click "New Post" to share something!</p>
+              <p className="font-bold text-[var(--foreground)] text-sm">No posts created by you yet.</p>
+              <p className="text-xs mt-1">Click "+ Create Post" above to publish your first post!</p>
             </>
           ) : (
             <>
