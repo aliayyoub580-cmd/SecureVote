@@ -6,6 +6,7 @@ import { format }            from 'date-fns'
 import { PostCard }           from '@/components/social/post-card'
 import { SocialAvatar }       from '@/components/social/avatar'
 import { RoleBadge }          from '@/components/social/role-badge'
+import { AuthGuardModal, useAuthGuard } from '@/components/social/auth-guard-modal'
 import { useAuth }            from '@/contexts/auth-context'
 import {
   socialProfilesService, socialPostsService, socialInteractionsService,
@@ -19,6 +20,7 @@ type Tab = typeof TABS[number]
 export function SocialProfilePage() {
   const { username }          = useParams<{ username: string }>()
   const { user }          = useAuth()
+  const { guard, modalOpen, modalAction, closeModal } = useAuthGuard(user?.id)
   const [profile,  setProfile]  = React.useState<SocialProfile | null>(null)
   const [posts,    setPosts]    = React.useState<SocialPost[]>([])
   const [tab,      setTab]      = React.useState<Tab>('Posts')
@@ -43,12 +45,14 @@ export function SocialProfilePage() {
     })()
   }, [username, user?.id])
 
-  const handleFollow = async () => {
-    if (!user || !profile) return
-    const nowFollowing = await socialInteractionsService.toggleFollow(user.id, profile.id)
-    setFollowing(nowFollowing)
-    setProfile(p => p ? { ...p, follower_count: p.follower_count + (nowFollowing ? 1 : -1), is_following: nowFollowing } : p)
-    toast.success(nowFollowing ? `Following @${username}` : `Unfollowed @${username}`)
+  const handleFollow = () => {
+    guard('follow this user', async () => {
+      if (!profile) return
+      const nowFollowing = await socialInteractionsService.toggleFollow(user!.id, profile.id)
+      setFollowing(nowFollowing)
+      setProfile(p => p ? { ...p, follower_count: p.follower_count + (nowFollowing ? 1 : -1), is_following: nowFollowing } : p)
+      toast.success(nowFollowing ? `Following @${username}` : `Unfollowed @${username}`)
+    })
   }
 
   if (loading) return (
@@ -66,6 +70,9 @@ export function SocialProfilePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 pb-32">
+      {/* Auth guard modal */}
+      <AuthGuardModal open={modalOpen} action={modalAction} onClose={closeModal} />
+
       {/* Banner */}
       <div className="relative h-40 bg-gradient-to-r from-[#031F28] to-[#0F4A5E] rounded-2xl overflow-hidden mb-0 border border-[#0F4A5E]">
         {profile.banner_path && (
@@ -87,7 +94,7 @@ export function SocialProfilePage() {
               <Link to="/settings" className="flex items-center gap-1.5 px-4 py-1.5 bg-[#0F4A5E] hover:bg-[#0F4A5E]/80 text-[#EDF7F6] rounded-lg text-xs font-medium transition-colors">
                 <Settings className="size-3.5" /> Edit Profile
               </Link>
-            ) : user ? (
+            ) : (
               <button onClick={handleFollow} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 following
                   ? 'bg-[#0F4A5E] text-[#EDF7F6] hover:bg-rose-500/20 hover:text-rose-400'
@@ -95,7 +102,7 @@ export function SocialProfilePage() {
               }`}>
                 {following ? <><UserMinus className="size-3.5" /> Unfollow</> : <><UserPlus className="size-3.5" /> Follow</>}
               </button>
-            ) : null}
+            )}
           </div>
         </div>
 

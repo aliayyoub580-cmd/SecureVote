@@ -47,6 +47,8 @@
     "framer-motion": "^12.23.26",
     "html2pdf.js": "^0.14.0",
     "lucide-react": "^0.562.0",
+    "mammoth": "^1.12.1",
+    "pdfjs-dist": "^6.2.108",
     "pg": "^8.22.0",
     "postcss": "^8.5.14",
     "react": "^19.2.6",

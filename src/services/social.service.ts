@@ -1,6 +1,29 @@
 import { supabase } from '@/lib/supabase/client'
 import type { SocialPost, SocialProfile, SocialComment, SocialNotification, SocialPoll, FeedFilter } from '@/types/social'
 
+// ─── Post Formatter ─────────────────────────────────────────────────────────
+
+export function formatSocialPost(p: any): SocialPost {
+  if (!p) return p
+  return {
+    ...p,
+    author_username: p.author_username ?? p.profiles?.username,
+    author_full_name: p.author_full_name ?? p.profiles?.full_name,
+    author_avatar:   p.author_avatar ?? p.profiles?.avatar_path,
+    author_role:     p.author_role ?? p.profiles?.role,
+    author_verified: p.author_verified ?? p.profiles?.is_verified,
+    media: (p.post_media ?? p.media ?? []).map((m: any) => ({
+      id: m.id || m.storage_path,
+      storage_path: m.storage_path,
+      media_type: m.media_type,
+      file_name: m.file_name,
+      file_size: m.file_size,
+      mime_type: m.mime_type,
+      display_order: m.display_order ?? 0,
+    })),
+  } as SocialPost
+}
+
 // ─── Feed ────────────────────────────────────────────────────────────────────
 
 export const socialFeedService = {
@@ -12,7 +35,7 @@ export const socialFeedService = {
       p_limit: limit,
     })
     if (error) throw error
-    return (data ?? []) as SocialPost[]
+    return ((data ?? []) as any[]).map(formatSocialPost)
   },
 }
 
@@ -48,30 +71,39 @@ export const socialPostsService = {
   async getById(id: string): Promise<SocialPost | null> {
     const { data, error } = await supabase
       .from('social_posts')
-      .select(`*, profiles!author_id(id,username,full_name,avatar_path,role,is_verified,is_suspended)`)
+      .select(`
+        *,
+        profiles!author_id(id,username,full_name,avatar_path,role,is_verified,is_suspended),
+        post_media(id,storage_path,media_type,file_name,file_size,mime_type,display_order)
+      `)
       .eq('id', id)
       .eq('status', 'published')
       .maybeSingle()
     if (error) throw error
-    return data as SocialPost | null
+    if (!data) return null
+    return formatSocialPost(data)
   },
 
   async getByUsername(username: string, cursor?: string, limit = 20): Promise<SocialPost[]> {
+    const { data: profile } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle()
+    if (!profile) return []
+
     let q = supabase
       .from('social_posts')
-      .select(`*, profiles!author_id(id,username,full_name,avatar_path,role,is_verified)`)
+      .select(`
+        *,
+        profiles!author_id(id,username,full_name,avatar_path,role,is_verified),
+        post_media(id,storage_path,media_type,file_name,file_size,mime_type,display_order)
+      `)
+      .eq('author_id', profile.id)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(limit)
 
-    // join by username sub-select
-    const { data: profile } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle()
-    if (!profile) return []
-    q = q.eq('author_id', profile.id)
     if (cursor) q = q.lt('published_at', cursor)
     const { data, error } = await q
     if (error) throw error
-    return (data ?? []) as SocialPost[]
+    return ((data ?? []) as any[]).map(formatSocialPost)
   },
 
   async update(id: string, patch: { title?: string; content?: string; contentHtml?: string; visibility?: string }) {
@@ -369,7 +401,8 @@ export const socialMediaService = {
   },
 
   async uploadPostPdf(userId: string, postId: string, file: File): Promise<string> {
-    const path = `${userId}/${postId}/${file.name}`
+    const cleanName = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')
+    const path = `${userId}/${postId}/${Date.now()}_${cleanName}`
     const { error } = await supabase.storage.from('post-pdfs').upload(path, file)
     if (error) throw error
     await supabase.from('post_media').insert({
@@ -380,7 +413,35 @@ export const socialMediaService = {
   },
 
   getImageUrl(path: string): string {
+    if (!path) return ''
+    if (path.startsWith('http://') || path.startsWith('https://')) return path
     return supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl
+  },
+
+  getMediaUrl(media: { media_type?: string; storage_path?: string; file_name?: string | null }): string {
+    const path = media.storage_path ?? ''
+    if (!path) return ''
+    if (path.startsWith('http://') || path.startsWith('https://')) return path
+    const isDoc = media.media_type === 'pdf' || !!media.file_name?.match(/\.(pdf|doc|docx)$/i)
+    const bucket = isDoc ? 'post-pdfs' : 'post-images'
+    return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl
+  },
+
+  getMediaUrls(media: { media_type?: string; storage_path?: string; file_name?: string | null }): string[] {
+    const path = media.storage_path ?? ''
+    if (!path) return []
+    if (path.startsWith('http://') || path.startsWith('https://')) return [path]
+    const segments = path.split('/')
+    const encodedPath = segments.map(encodeURIComponent).join('/')
+
+    const list: string[] = []
+    list.push(supabase.storage.from('post-pdfs').getPublicUrl(path).data.publicUrl)
+    list.push(supabase.storage.from('post-images').getPublicUrl(path).data.publicUrl)
+    if (encodedPath !== path) {
+      list.push(supabase.storage.from('post-pdfs').getPublicUrl(encodedPath).data.publicUrl)
+      list.push(supabase.storage.from('post-images').getPublicUrl(encodedPath).data.publicUrl)
+    }
+    return list
   },
 }
 

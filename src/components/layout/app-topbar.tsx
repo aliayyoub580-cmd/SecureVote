@@ -53,18 +53,6 @@ export function AppTopbar() {
           </Link>
         </Button>
 
-        {/* Quick Community Social Feed Link */}
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="hidden md:flex h-9 px-3 gap-2 rounded-xl border-[var(--border)] bg-[var(--card)] hover:bg-[var(--muted)] text-[var(--foreground)] text-xs font-bold shadow-sm transition-all"
-        >
-          <Link to={ROUTES.communityFeed}>
-            <Rss className="size-3.5 text-emerald-400 shrink-0" />
-            <span>Community Feed</span>
-          </Link>
-        </Button>
 
         {/* Theme Toggle */}
         <div className="flex items-center gap-1 p-1 rounded-lg bg-[var(--card)] border border-[var(--border)]">
@@ -119,7 +107,7 @@ export function AppTopbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="focus:bg-[var(--muted)] focus:text-[var(--foreground)] rounded-lg cursor-pointer">
-                  <Link to={ROUTES.communityFeed} className="flex items-center gap-2">
+                  <Link to={ROUTES.social} className="flex items-center gap-2">
                     <Rss className="size-4 text-emerald-400" />
                     <span>Community Social Feed</span>
                   </Link>

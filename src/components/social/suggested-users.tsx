@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/auth-context'
 import { socialInteractionsService } from '@/services/social.service'
+import { AuthGuardModal, useAuthGuard } from './auth-guard-modal'
 import { toast } from '@/lib/toast'
 
 interface SuggestedUser {
@@ -17,6 +18,7 @@ interface SuggestedUser {
 
 export function SuggestedUsers() {
   const { user } = useAuth()
+  const { guard, modalOpen, modalAction, closeModal } = useAuthGuard(user?.id)
   const [users, setUsers] = React.useState<SuggestedUser[]>([])
   const [loading, setLoading] = React.useState(true)
 
@@ -66,41 +68,37 @@ export function SuggestedUsers() {
     void loadSuggested()
   }, [user?.id])
 
-  const handleFollowToggle = async (targetId: string, currentStatus?: boolean) => {
-    if (!user) {
-      toast.error('Please sign in to follow users.')
-      return
-    }
-
-    setUsers(prev =>
-      prev.map(u => (u.id === targetId ? { ...u, is_following: !currentStatus } : u))
-    )
-
-    try {
-      await socialInteractionsService.toggleFollow(user.id, targetId)
-      toast.success(currentStatus ? 'Unfollowed user' : 'Following user')
-    } catch {
+  const handleFollowToggle = (targetId: string, currentStatus?: boolean) => {
+    guard('follow this user', async () => {
       setUsers(prev =>
-        prev.map(u => (u.id === targetId ? { ...u, is_following: currentStatus } : u))
+        prev.map(u => (u.id === targetId ? { ...u, is_following: !currentStatus } : u))
       )
-      toast.error('Action failed')
-    }
+      try {
+        await socialInteractionsService.toggleFollow(user!.id, targetId)
+        toast.success(currentStatus ? 'Unfollowed user' : 'Following user')
+      } catch {
+        setUsers(prev =>
+          prev.map(u => (u.id === targetId ? { ...u, is_following: currentStatus } : u))
+        )
+        toast.error('Action failed')
+      }
+    })
   }
 
   if (loading) {
     return (
-      <div className="bg-[#0B3541] border border-[#0F4A5E] rounded-2xl p-4 space-y-3 animate-pulse">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 space-y-3 animate-pulse">
         <div className="flex justify-between items-center mb-2">
-          <div className="h-4 bg-[#0F4A5E] rounded w-32" />
-          <div className="size-4 bg-[#0F4A5E] rounded" />
+          <div className="h-4 bg-[var(--muted)] rounded w-32" />
+          <div className="size-4 bg-[var(--muted)] rounded" />
         </div>
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
-              <div className="size-10 bg-[#0F4A5E] rounded-full shrink-0" />
+              <div className="size-10 bg-[var(--muted)] rounded-full shrink-0" />
               <div className="flex-1 space-y-1.5">
-                <div className="h-3 bg-[#0F4A5E] rounded w-24" />
-                <div className="h-2 bg-[#0F4A5E] rounded w-16" />
+                <div className="h-3 bg-[var(--muted)] rounded w-24" />
+                <div className="h-2 bg-[var(--muted)] rounded w-16" />
               </div>
             </div>
           ))}
@@ -112,17 +110,18 @@ export function SuggestedUsers() {
   if (users.length === 0) return null
 
   return (
-    <div className="bg-[#0B3541] border border-[#0F4A5E] rounded-2xl p-4 shadow-lg">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
+      <AuthGuardModal open={modalOpen} action={modalAction} onClose={closeModal} />
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#0F4A5E]/60">
-        <h3 className="text-sm font-bold text-[#EDF7F6] tracking-tight flex items-center gap-2">
+      <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--border)]">
+        <h3 className="text-sm font-bold text-[var(--foreground)] tracking-tight flex items-center gap-2">
           Suggested Users
         </h3>
-        <Sparkles className="size-4 text-[#2EE6B8]" />
+        <Sparkles className="size-4 text-[var(--accent-primary)]" />
       </div>
 
       {/* User list */}
-      <div className="divide-y divide-[#0F4A5E]/40">
+      <div className="divide-y divide-[var(--border)]">
         {users.map(u => {
           const initials = (u.full_name || u.username || 'U')
             .split(' ')
@@ -134,7 +133,7 @@ export function SuggestedUsers() {
           return (
             <div key={u.id} className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3 group">
               <Link to={`/social/profile/${u.username}`} className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="size-10 rounded-full bg-gradient-to-br from-[#2EE6B8]/30 via-emerald-500/20 to-blue-500/30 border border-[#2EE6B8]/40 flex items-center justify-center text-[#2EE6B8] font-bold text-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden shadow-inner">
+                <div className="size-10 rounded-full bg-[var(--accent-primary)]/15 border border-[var(--accent-primary)]/30 flex items-center justify-center text-[var(--accent-primary)] font-bold text-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden shadow-xs">
                   {u.avatar_path ? (
                     <img src={u.avatar_path} alt={u.full_name} className="size-full object-cover" />
                   ) : (
@@ -142,10 +141,10 @@ export function SuggestedUsers() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-sm font-bold text-[#EDF7F6] truncate group-hover:text-[#2EE6B8] transition-colors leading-tight">
+                  <h4 className="text-sm font-bold text-[var(--foreground)] truncate group-hover:text-[var(--accent-primary)] transition-colors leading-tight">
                     {u.full_name || u.username}
                   </h4>
-                  <p className="text-xs text-[#7FA3AB] truncate mt-0.5">@{u.username}</p>
+                  <p className="text-xs text-[var(--muted-foreground)] truncate mt-0.5">@{u.username}</p>
                 </div>
               </Link>
 
@@ -155,8 +154,8 @@ export function SuggestedUsers() {
                   onClick={() => handleFollowToggle(u.id, u.is_following)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
                     u.is_following
-                      ? 'bg-[#0F4A5E] text-[#7FA3AB] hover:text-rose-400 hover:bg-rose-500/10'
-                      : 'bg-[#2EE6B8] text-[#031F28] hover:bg-[#2EE6B8]/90 shadow-[0_0_10px_rgba(46,230,184,0.2)]'
+                      ? 'bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-rose-500 hover:bg-rose-500/10'
+                      : 'bg-[var(--accent-primary)] text-[var(--primary-foreground)] hover:opacity-90 shadow-xs'
                   }`}
                 >
                   {u.is_following ? (

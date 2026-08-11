@@ -1,9 +1,10 @@
-import { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { lazy, Suspense, useState } from 'react'
+import { Route, Routes, Navigate, Outlet } from 'react-router-dom'
 
 import { AuthLayout }     from '@/components/layout/auth-layout'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
-import { SocialLayout }   from '@/components/layout/social-layout'
+import { LandingNavbar }   from '@/components/landing/landing-navbar'
+import { LandingFooter }   from '@/components/landing/landing-footer'
 import { RouteFallback }  from '@/components/feedback/route-fallback'
 import { ResetPasswordPage } from '@/pages/auth/reset-password-page'
 import { NotFoundPage }   from '@/pages/misc/not-found-page'
@@ -12,6 +13,26 @@ import { OfflineBanner }  from '@/components/common/offline-banner'
 import { GuestRoute }     from '@/routes/GuestRoute'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 import { RoleGuard }      from '@/routes/RoleGuard'
+import { useAuth }        from '@/contexts/auth-context'
+
+function AdaptiveSocialLayout() {
+  const { user } = useAuth()
+  const [search, setSearch] = useState('')
+
+  if (!user) {
+    return (
+      <div className="min-h-dvh bg-[var(--background)] text-[var(--foreground)] selection:bg-primary/20 selection:text-primary flex flex-col">
+        <LandingNavbar search={search} onSearchChange={setSearch} />
+        <main className="flex-1 pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <Outlet />
+        </main>
+        <LandingFooter />
+      </div>
+    )
+  }
+
+  return <DashboardLayout />
+}
 
 // Landing page
 const LandingPage          = lazy(() => import('@/pages/landing/landing-page').then(m => ({ default: m.LandingPage })))
@@ -120,6 +141,7 @@ export function AppRoutes() {
           <Route path="/elections/:id/results" element={<ResultsPage />} />
         </Route>
 
+        {/* ── Protected Panels (User, Creator, Admin) ── */}
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
@@ -153,44 +175,37 @@ export function AppRoutes() {
 
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+        </Route>
 
-            {/* ── Social Media Module in Portal (Shows user's own posts) ── */}
-            <Route element={<SocialLayout />}>
-              <Route path="/social"                     element={<SocialFeedPage myPostsOnly={true} />} />
-              <Route path="/social/news"                element={<NewsPage />} />
-              <Route path="/social/search"              element={<SocialSearchPage />} />
-              <Route path="/social/notifications"       element={<SocialNotifPage />} />
-              <Route path="/social/bookmarks"           element={<SocialBookmarksPage />} />
-              <Route path="/social/drafts"              element={<SocialDraftsPage />} />
-              <Route path="/social/create"              element={<SocialCreatePage />} />
-              <Route path="/social/trending"            element={<SocialHashtagPage />} />
-              <Route path="/social/following"           element={<SocialFeedPage myPostsOnly={true} />} />
-              <Route path="/social/hashtag/:tag"        element={<SocialHashtagPage />} />
-              <Route path="/social/posts/:id"           element={<SocialPostDetailPage />} />
-              <Route path="/social/profile/:username"   element={<SocialProfilePage />} />
-              <Route element={<RoleGuard allow={['super_admin']} />}>
-                <Route path="/admin/social"             element={<AdminSocialPage />} />
-              </Route>
+            {/* ── Social Media — PUBLIC (no login required to view) ────────── */}
+        <Route element={<AdaptiveSocialLayout />}>
+          {/* Public read routes — accessible to guests and logged-in users */}
+          <Route path="/social"                   element={<SocialFeedPage myPostsOnly={false} />} />
+          <Route path="/social/search"            element={<SocialSearchPage />} />
+          <Route path="/social/trending"          element={<SocialHashtagPage />} />
+          <Route path="/social/hashtag/:tag"      element={<SocialHashtagPage />} />
+          <Route path="/social/posts/:id"         element={<SocialPostDetailPage />} />
+          <Route path="/social/profile/:username" element={<SocialProfilePage />} />
+          <Route path="/social/news"              element={<NewsPage />} />
+
+          {/* Authenticated-only social routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/social/my-posts"        element={<SocialFeedPage myPostsOnly={true} />} />
+            <Route path="/social/following"       element={<SocialFeedPage myPostsOnly={false} />} />
+            <Route path="/social/notifications"   element={<SocialNotifPage />} />
+            <Route path="/social/bookmarks"       element={<SocialBookmarksPage />} />
+            <Route path="/social/drafts"          element={<SocialDraftsPage />} />
+            <Route path="/social/create"          element={<SocialCreatePage />} />
+            <Route element={<RoleGuard allow={['super_admin']} />}>
+              <Route path="/admin/social"         element={<AdminSocialPage />} />
             </Route>
           </Route>
         </Route>
 
-        {/* ── Standalone User Panel Social Media Module (Shows all community posts) ── */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<SocialLayout />}>
-            <Route path="/community-feed"             element={<SocialFeedPage myPostsOnly={false} />} />
-            <Route path="/community/search"           element={<SocialSearchPage />} />
-            <Route path="/community/notifications"    element={<SocialNotifPage />} />
-            <Route path="/community/bookmarks"        element={<SocialBookmarksPage />} />
-            <Route path="/community/drafts"           element={<SocialDraftsPage />} />
-            <Route path="/community/create"           element={<SocialCreatePage />} />
-            <Route path="/community/trending"         element={<SocialHashtagPage />} />
-            <Route path="/community/following"        element={<SocialFeedPage myPostsOnly={false} />} />
-            <Route path="/community/hashtag/:tag"     element={<SocialHashtagPage />} />
-            <Route path="/community/posts/:id"        element={<SocialPostDetailPage />} />
-            <Route path="/community/profile/:username" element={<SocialProfilePage />} />
-          </Route>
-        </Route>
+        {/* Backwards compat redirect */}
+        <Route path="/community-feed" element={<Navigate to="/social" replace />} />
+        <Route path="/public/social"  element={<Navigate to="/social" replace />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
