@@ -73,6 +73,12 @@ export const profilesService = {
     full_name?: string | null
     phone?: string | null
     organization?: string | null
+    username?: string | null
+    bio?: string | null
+    website?: string | null
+    location?: string | null
+    avatar_path?: string | null
+    banner_path?: string | null
   }) {
     const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid) throw new Error('Not signed in')
