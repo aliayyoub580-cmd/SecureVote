@@ -1,6 +1,6 @@
 import type { UserRole } from './database'
 
-export type FeedFilter = 'latest' | 'trending' | 'following' | 'election_updates' | 'most_liked'
+export type FeedFilter = 'latest' | 'my_posts' | 'trending' | 'following' | 'election_updates' | 'most_liked'
 
 export type PostType =
   | 'text' | 'image' | 'multi_image' | 'pdf'

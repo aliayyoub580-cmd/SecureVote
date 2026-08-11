@@ -18,8 +18,9 @@ export function useSocialFeed(userId: string | undefined, filter: FeedFilter = '
   const fetchPage = React.useCallback(async (reset = false) => {
     setLoading(true)
     try {
+      const isMyPosts = myPostsOnly || filter === 'my_posts'
       // ── "My Posts" view: needs an authenticated user ──────────────────────
-      if (myPostsOnly && userId) {
+      if (isMyPosts && userId) {
         let q = supabase
           .from('social_posts')
           .select(`
@@ -109,7 +110,8 @@ export function useSocialFeed(userId: string | undefined, filter: FeedFilter = '
     void (async () => {
       setLoading(true)
       try {
-        if (myPostsOnly && userId) {
+        const isMyPosts = myPostsOnly || filter === 'my_posts'
+        if (isMyPosts && userId) {
           const { data } = await supabase
             .from('social_posts')
             .select(`

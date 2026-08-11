@@ -15,6 +15,7 @@ import type { FeedFilter } from '@/types/social'
 
 const FILTERS: { value: FeedFilter; label: string }[] = [
   { value: 'latest',           label: 'Latest'    },
+  { value: 'my_posts',         label: 'My Posts'  },
   { value: 'trending',         label: 'Trending'  },
   { value: 'following',        label: 'Following' },
   { value: 'election_updates', label: 'Elections' },
@@ -22,7 +23,7 @@ const FILTERS: { value: FeedFilter; label: string }[] = [
 
 export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean }) {
   const { user } = useAuth()
-  const [filter,       setFilter]       = React.useState<FeedFilter>('latest')
+  const [filter,       setFilter]       = React.useState<FeedFilter>(myPostsOnly ? 'my_posts' : 'latest')
   const [showComposer, setShowComposer] = React.useState(false)
 
   // Auth guard — used for interactions when not logged in
@@ -81,38 +82,24 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
         <div className="flex items-center gap-2">
           <Rss className="size-4 text-[var(--accent-primary)]" />
           <h2 className="text-base font-black text-[var(--foreground)] tracking-tight">
-            {myPostsOnly ? 'My Posts' : 'Community Feed'}
+            {filter === 'my_posts' || myPostsOnly ? 'My Posts' : 'Social Feed'}
           </h2>
-          {myPostsOnly && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border border-[var(--accent-primary)]/20 text-[10px] font-bold">
-              My Posts
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-2">
           {user && (
             <button
               type="button"
               onClick={handleCreatePost}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--accent-primary)] text-[var(--primary-foreground)] text-xs font-bold hover:opacity-90 transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--accent-primary)] text-[var(--primary-foreground)] text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-all"
             >
               {showComposer ? <X className="size-3.5" /> : <Plus className="size-3.5" />}
-              <span>{showComposer ? 'Close' : 'New Post'}</span>
+              <span>{showComposer ? 'Close Composer' : '+ Create Post'}</span>
             </button>
-          )}
-          {myPostsOnly && (
-            <Link
-              to={ROUTES.social}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--accent-primary)] hover:border-[var(--accent-primary)]/30 transition-all"
-            >
-              <Globe className="size-3.5" />
-              <span>All Posts</span>
-            </Link>
           )}
           <button
             onClick={refresh}
-            className="p-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--accent-primary)] hover:bg-[var(--muted)] transition-colors"
-            title="Refresh"
+            className="p-2 rounded-xl bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--accent-primary)] transition-colors"
+            title="Refresh feed"
           >
             <RefreshCw className="size-3.5" />
           </button>
@@ -146,6 +133,8 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
               onClick={() => {
                 if (f.value === 'following') {
                   guard('view posts from accounts you follow', () => setFilter('following'))
+                } else if (f.value === 'my_posts') {
+                  guard('view your created posts', () => setFilter('my_posts'))
                 } else {
                   setFilter(f.value)
                 }
