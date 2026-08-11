@@ -10,7 +10,6 @@ import { LandingNavbar } from '@/components/landing/landing-navbar'
 import { LandingSecurity } from '@/components/landing/landing-security'
 import { LandingSeo } from '@/components/landing/landing-seo'
 import { LandingStatsCharts, LandingStatsStrip } from '@/components/landing/landing-stats'
-import { LandingTeam } from '@/components/landing/landing-team'
 import { LandingTestimonials } from '@/components/landing/landing-testimonials'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useLandingElections } from '@/hooks/use-landing-elections'
@@ -213,7 +212,6 @@ export function LandingPage() {
         )}
         <LandingFeatures />
         <LandingHowItWorks />
-        <LandingTeam />
         <LandingTestimonials />
         <LandingSecurity />
       </main>
