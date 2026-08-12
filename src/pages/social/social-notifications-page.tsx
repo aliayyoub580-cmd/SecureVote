@@ -39,6 +39,12 @@ export function SocialNotificationsPage() {
   const { user } = useAuth()
   const { notifications, unreadCount, loading, markAllRead } = useSocialNotifications(user?.id)
 
+  React.useEffect(() => {
+    if (user?.id && unreadCount > 0) {
+      void markAllRead()
+    }
+  }, [user?.id, unreadCount, markAllRead])
+
   return (
     <div className="mx-auto max-w-2xl px-4 pt-6 pb-32 space-y-5">
       <div className="flex items-center justify-between">
@@ -69,7 +75,8 @@ export function SocialNotificationsPage() {
         <div className="space-y-2">
           <AnimatePresence initial={false}>
             {notifications.map(n => {
-              const cfg = NOTIF_ICONS[n.notif_type]
+              const cfg = NOTIF_ICONS[n.notif_type] ?? { Icon: Bell, color: 'text-[#2EE6B8]' }
+              const notifLabel = NOTIF_TEXT[n.notif_type] ?? 'sent a notification'
               const isUnread = !n.read_at
               return (
                 <motion.div key={n.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
@@ -80,7 +87,7 @@ export function SocialNotificationsPage() {
                     }`}
                   >
                     <div className="relative flex-shrink-0">
-                      <SocialAvatar src={n.actor?.avatar_path} name={n.actor?.full_name} size="sm" />
+                      <SocialAvatar src={n.actor?.avatar_path} name={n.actor?.full_name || n.actor?.username} size="sm" />
                       <div className={`absolute -bottom-0.5 -right-0.5 size-5 rounded-full bg-[#0B3541] flex items-center justify-center border border-[#0F4A5E] ${cfg.color}`}>
                         <cfg.Icon className="size-2.5" />
                       </div>
@@ -88,10 +95,10 @@ export function SocialNotificationsPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-[#EDF7F6] truncate">
                         <span className="font-semibold">@{n.actor?.username ?? 'Someone'}</span>
-                        {' '}{NOTIF_TEXT[n.notif_type]}
+                        {' '}{notifLabel}
                       </p>
                       <p className="text-[10px] text-[#7FA3AB] mt-0.5">
-                        {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                        {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) : 'Just now'}
                       </p>
                     </div>
                     {isUnread && <div className="size-2 rounded-full bg-[#2EE6B8] flex-shrink-0" />}

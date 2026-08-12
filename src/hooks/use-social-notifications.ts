@@ -28,8 +28,9 @@ export function useSocialNotifications(userId: string | undefined) {
   // Realtime inserts
   React.useEffect(() => {
     if (!userId) return
+    const channelName = `social-notif-${userId}-${Math.random().toString(36).substring(2, 7)}`
     const channel = supabase
-      .channel(`social-notif-${userId}`)
+      .channel(channelName)
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'social_notifications',
         filter: `recipient_id=eq.${userId}`,
@@ -38,7 +39,13 @@ export function useSocialNotifications(userId: string | undefined) {
         setUnreadCount(c => c + 1)
       })
       .subscribe()
-    return () => { void supabase.removeChannel(channel) }
+    return () => {
+      try {
+        void supabase.removeChannel(channel)
+      } catch (err) {
+        console.warn('[useSocialNotifications] removeChannel warning:', err)
+      }
+    }
   }, [userId])
 
   const markAllRead = React.useCallback(async () => {
