@@ -174,6 +174,8 @@ export function AppRoutes() {
             <Route path="/social/hashtag/:tag"      element={<SocialHashtagPage />} />
             <Route path="/social/posts/:id"         element={<SocialPostDetailPage />} />
             <Route path="/social/profile/:username" element={<SocialProfilePage />} />
+            <Route path="/social/profile/:username/following" element={<SocialProfilePage />} />
+            <Route path="/social/profile/:username/followers" element={<SocialProfilePage />} />
             <Route path="/social/news"              element={<NewsPage />} />
 
             {/* Authenticated-only social routes */}

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useParams, Link }   from 'react-router-dom'
+import { useParams, Link, useLocation }   from 'react-router-dom'
 import { MapPin, Link as LinkIcon, Calendar, UserPlus, UserMinus, Settings } from 'lucide-react'
 import { format }            from 'date-fns'
 
@@ -14,12 +14,13 @@ import {
 import { toast } from '@/lib/toast'
 import type { SocialProfile, SocialPost } from '@/types/social'
 
-const TABS = ['Posts', 'Media', 'Likes', 'Bookmarks'] as const
+const TABS = ['Posts', 'Following', 'Followers', 'Media', 'Likes', 'Bookmarks'] as const
 type Tab = typeof TABS[number]
 
 export function SocialProfilePage() {
   const { username }          = useParams<{ username: string }>()
-  const { user }          = useAuth()
+  const location              = useLocation()
+  const { user }              = useAuth()
   const { guard, modalOpen, modalAction, closeModal } = useAuthGuard(user?.id)
   const [profile,  setProfile]  = React.useState<SocialProfile | null>(null)
   const [posts,    setPosts]    = React.useState<SocialPost[]>([])
@@ -27,7 +28,19 @@ export function SocialProfilePage() {
   const [loading,  setLoading]  = React.useState(true)
   const [following, setFollowing] = React.useState(false)
 
+  const [followingUsers, setFollowingUsers] = React.useState<SocialProfile[]>([])
+  const [followerUsers,  setFollowerUsers]  = React.useState<SocialProfile[]>([])
+  const [listLoading,    setListLoading]    = React.useState(false)
+
   const isOwn = user?.id === profile?.id
+
+  React.useEffect(() => {
+    if (location.pathname.endsWith('/following')) {
+      setTab('Following')
+    } else if (location.pathname.endsWith('/followers')) {
+      setTab('Followers')
+    }
+  }, [location.pathname])
 
   React.useEffect(() => {
     if (!username) return
@@ -44,6 +57,23 @@ export function SocialProfilePage() {
       } finally { setLoading(false) }
     })()
   }, [username, user?.id])
+
+  React.useEffect(() => {
+    if (!profile) return
+    if (tab === 'Following') {
+      setListLoading(true)
+      socialProfilesService.getFollowing(profile.id)
+        .then(setFollowingUsers)
+        .catch(console.error)
+        .finally(() => setListLoading(false))
+    } else if (tab === 'Followers') {
+      setListLoading(true)
+      socialProfilesService.getFollowers(profile.id)
+        .then(setFollowerUsers)
+        .catch(console.error)
+        .finally(() => setListLoading(false))
+    }
+  }, [profile, tab])
 
   const handleFollow = () => {
     guard('follow this user', async () => {
@@ -138,16 +168,16 @@ export function SocialProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-[#0B3541] border border-[#0F4A5E] rounded-xl p-1 mb-5">
+      <div className="flex gap-1 bg-[#0B3541] border border-[#0F4A5E] rounded-xl p-1 mb-5 overflow-x-auto no-scrollbar">
         {TABS.map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${tab === t ? 'bg-[#2EE6B8] text-[#031F28]' : 'text-[#7FA3AB] hover:text-[#EDF7F6]'}`}>
+            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${tab === t ? 'bg-[#2EE6B8] text-[#031F28] font-bold' : 'text-[#7FA3AB] hover:text-[#EDF7F6]'}`}>
             {t}
           </button>
         ))}
       </div>
 
-      {/* Posts list */}
+      {/* Tab Content */}
       <div className="space-y-4">
         {tab === 'Posts' && posts.map(post => (
           <PostCard key={post.id} post={post} onDelete={id => setPosts(p => p.filter(x => x.id !== id))} />
@@ -155,7 +185,62 @@ export function SocialProfilePage() {
         {tab === 'Posts' && posts.length === 0 && (
           <p className="text-center text-[#7FA3AB] py-12 text-sm">No posts yet.</p>
         )}
-        {tab !== 'Posts' && (
+
+        {tab === 'Following' && (
+          <div className="space-y-3">
+            {listLoading ? (
+              <div className="text-center py-12 text-[#7FA3AB] text-sm">Loading following...</div>
+            ) : followingUsers.length === 0 ? (
+              <p className="text-center text-[#7FA3AB] py-12 text-sm">Not following anyone yet.</p>
+            ) : (
+              followingUsers.map(u => (
+                <div key={u.id} className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B3541] border border-[#0F4A5E] hover:border-[#2EE6B8]/40 transition-colors">
+                  <Link to={`/social/profile/${u.username}`} className="flex items-center gap-3 min-w-0 flex-1">
+                    <SocialAvatar src={u.avatar_path} name={u.full_name || u.username} size="md" verified={u.is_verified} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-[#EDF7F6] truncate hover:text-[#2EE6B8] transition-colors">
+                          {u.full_name || u.username}
+                        </h4>
+                        {u.role && <RoleBadge role={u.role as any} />}
+                      </div>
+                      <p className="text-xs text-[#7FA3AB] truncate">@{u.username}</p>
+                    </div>
+                  </Link>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {tab === 'Followers' && (
+          <div className="space-y-3">
+            {listLoading ? (
+              <div className="text-center py-12 text-[#7FA3AB] text-sm">Loading followers...</div>
+            ) : followerUsers.length === 0 ? (
+              <p className="text-center text-[#7FA3AB] py-12 text-sm">No followers yet.</p>
+            ) : (
+              followerUsers.map(u => (
+                <div key={u.id} className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B3541] border border-[#0F4A5E] hover:border-[#2EE6B8]/40 transition-colors">
+                  <Link to={`/social/profile/${u.username}`} className="flex items-center gap-3 min-w-0 flex-1">
+                    <SocialAvatar src={u.avatar_path} name={u.full_name || u.username} size="md" verified={u.is_verified} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-[#EDF7F6] truncate hover:text-[#2EE6B8] transition-colors">
+                          {u.full_name || u.username}
+                        </h4>
+                        {u.role && <RoleBadge role={u.role as any} />}
+                      </div>
+                      <p className="text-xs text-[#7FA3AB] truncate">@{u.username}</p>
+                    </div>
+                  </Link>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {tab !== 'Posts' && tab !== 'Following' && tab !== 'Followers' && (
           <p className="text-center text-[#7FA3AB] py-12 text-sm">Coming soon.</p>
         )}
       </div>
