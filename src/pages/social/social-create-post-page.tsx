@@ -20,3 +20,6 @@ export function SocialCreatePostPage() {
     </div>
   )
 }
+
+export const SocialCreatePage = SocialCreatePostPage
+export default SocialCreatePostPage
