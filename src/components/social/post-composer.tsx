@@ -40,9 +40,10 @@ interface PostComposerProps {
   onSuccess?: (postId: string) => void
   onCancel?: () => void
   initialDraftId?: string
+  editPostId?: string
 }
 
-export function PostComposer({ onSuccess, onCancel, initialDraftId }: PostComposerProps) {
+export function PostComposer({ onSuccess, onCancel, initialDraftId, editPostId }: PostComposerProps) {
   const { user, profile } = useAuth()
   const navigate = useNavigate()
 
@@ -58,6 +59,7 @@ export function PostComposer({ onSuccess, onCancel, initialDraftId }: PostCompos
   const [showEmoji,   setShowEmoji]   = React.useState(false)
   const [showVisMenu, setShowVisMenu] = React.useState(false)
   const [draftId,     setDraftId]     = React.useState(initialDraftId ?? '')
+  const [loadingEdit, setLoadingEdit] = React.useState(Boolean(editPostId))
 
   const editor = useEditor({
     extensions: [
@@ -68,6 +70,31 @@ export function PostComposer({ onSuccess, onCancel, initialDraftId }: PostCompos
       attributes: { class: 'min-h-[100px] focus:outline-none text-[#EDF7F6] text-sm leading-relaxed' },
     },
   })
+
+  React.useEffect(() => {
+    if (!editPostId) return
+    let isMounted = true
+    void (async () => {
+      setLoadingEdit(true)
+      try {
+        const post = await socialPostsService.getById(editPostId)
+        if (post && isMounted) {
+          setTitle(post.title ?? '')
+          setPostType(post.post_type)
+          setVisibility(post.visibility)
+          if (post.hashtags) setHashtags(post.hashtags)
+          if (editor && (post.content_html || post.content)) {
+            editor.commands.setContent(post.content_html || post.content || '')
+          }
+        }
+      } catch (err) {
+        toast.error('Failed to load post details for editing.')
+      } finally {
+        if (isMounted) setLoadingEdit(false)
+      }
+    })()
+    return () => { isMounted = false }
+  }, [editPostId, editor])
 
   const charCount = editor?.getText().length ?? 0
   const visConfig = VISIBILITY_OPTIONS.find(v => v.value === visibility) ?? VISIBILITY_OPTIONS[0]
@@ -93,6 +120,25 @@ export function PostComposer({ onSuccess, onCancel, initialDraftId }: PostCompos
       return
     }
     if (status === 'published') setPublishing(true)
+
+    if (editPostId) {
+      try {
+        await socialPostsService.update(editPostId, {
+          title: title.trim() || undefined,
+          content,
+          contentHtml,
+          visibility,
+        })
+        toast.success('Post updated successfully!')
+        onSuccess?.(editPostId)
+        navigate(`/social/posts/${editPostId}`)
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : 'Failed to update post.')
+      } finally {
+        setPublishing(false)
+      }
+      return
+    }
 
     try {
       const postId = await socialPostsService.create({
@@ -312,11 +358,11 @@ export function PostComposer({ onSuccess, onCancel, initialDraftId }: PostCompos
             </button>
             <button
               onClick={() => void publish('published')}
-              disabled={publishing || uploading || charCount > MAX_CHARS}
+              disabled={publishing || uploading || charCount > MAX_CHARS || loadingEdit}
               className="flex items-center gap-1.5 px-4 py-1.5 bg-[#2EE6B8] hover:bg-[#2EE6B8]/90 text-[#031F28] rounded-lg text-xs font-bold disabled:opacity-40 transition-colors shadow-[0_0_12px_rgba(46,230,184,0.25)]"
             >
-              {(publishing || uploading) ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
-              Publish
+              {(publishing || uploading || loadingEdit) ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
+              {editPostId ? 'Update Post' : 'Publish'}
             </button>
           </div>
         </div>

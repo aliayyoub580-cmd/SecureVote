@@ -27,6 +27,7 @@ const SocialNotifPage      = lazy(() => import('@/pages/social/social-notificati
 const SocialBookmarksPage  = lazy(() => import('@/pages/social/social-bookmarks-page').then(m => ({ default: m.SocialBookmarksPage })))
 const SocialDraftsPage     = lazy(() => import('@/pages/social/social-drafts-page').then(m => ({ default: m.SocialDraftsPage })))
 const SocialCreatePage     = lazy(() => import('@/pages/social/social-create-post-page').then(m => ({ default: m.SocialCreatePage })))
+const SocialEditPostPage   = lazy(() => import('@/pages/social/social-edit-post-page').then(m => ({ default: m.SocialEditPostPage })))
 const SocialHashtagPage    = lazy(() => import('@/pages/social/social-hashtag-page').then(m => ({ default: m.SocialHashtagPage })))
 const NewsPage             = lazy(() => import('@/pages/social/news-page').then(m => ({ default: m.NewsPage })))
 const AdminSocialPage      = lazy(() => import('@/pages/social/admin-social-moderation-page').then(m => ({ default: m.AdminSocialModerationPage })))
@@ -186,6 +187,7 @@ export function AppRoutes() {
               <Route path="/social/bookmarks"       element={<SocialBookmarksPage />} />
               <Route path="/social/drafts"          element={<SocialDraftsPage />} />
               <Route path="/social/create"          element={<SocialCreatePage />} />
+              <Route path="/social/posts/:id/edit"  element={<SocialEditPostPage />} />
             </Route>
           </Route>
         </Route>
