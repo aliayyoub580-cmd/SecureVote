@@ -1,10 +1,10 @@
-import { lazy, Suspense, useState } from 'react'
-import { Route, Routes, Navigate, Outlet } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { Route, Routes, Navigate } from 'react-router-dom'
 
 import { AuthLayout }     from '@/components/layout/auth-layout'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
-import { LandingNavbar }   from '@/components/landing/landing-navbar'
-import { LandingFooter }   from '@/components/landing/landing-footer'
+import { SocialLayout }    from '@/components/layout/social-layout'
+import { SocialPageLayout } from '@/components/layout/social-page-layout'
 import { RouteFallback }  from '@/components/feedback/route-fallback'
 import { ResetPasswordPage } from '@/pages/auth/reset-password-page'
 import { NotFoundPage }   from '@/pages/misc/not-found-page'
@@ -14,25 +14,6 @@ import { GuestRoute }     from '@/routes/GuestRoute'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 import { RoleGuard }      from '@/routes/RoleGuard'
 import { useAuth }        from '@/contexts/auth-context'
-
-function AdaptiveSocialLayout() {
-  const { user } = useAuth()
-  const [search, setSearch] = useState('')
-
-  if (!user) {
-    return (
-      <div className="min-h-dvh bg-[var(--background)] text-[var(--foreground)] selection:bg-primary/20 selection:text-primary flex flex-col">
-        <LandingNavbar search={search} onSearchChange={setSearch} />
-        <main className="flex-1 pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-          <Outlet />
-        </main>
-        <LandingFooter />
-      </div>
-    )
-  }
-
-  return <DashboardLayout />
-}
 
 // Landing page
 const LandingPage          = lazy(() => import('@/pages/landing/landing-page').then(m => ({ default: m.LandingPage })))
@@ -45,7 +26,7 @@ const SocialSearchPage     = lazy(() => import('@/pages/social/social-search-pag
 const SocialNotifPage      = lazy(() => import('@/pages/social/social-notifications-page').then(m => ({ default: m.SocialNotificationsPage })))
 const SocialBookmarksPage  = lazy(() => import('@/pages/social/social-bookmarks-page').then(m => ({ default: m.SocialBookmarksPage })))
 const SocialDraftsPage     = lazy(() => import('@/pages/social/social-drafts-page').then(m => ({ default: m.SocialDraftsPage })))
-const SocialCreatePage     = lazy(() => import('@/pages/social/social-create-post-page').then(m => ({ default: m.SocialCreatePostPage })))
+const SocialCreatePage     = lazy(() => import('@/pages/social/social-create-post-page').then(m => ({ default: m.SocialCreatePage })))
 const SocialHashtagPage    = lazy(() => import('@/pages/social/social-hashtag-page').then(m => ({ default: m.SocialHashtagPage })))
 const NewsPage             = lazy(() => import('@/pages/social/news-page').then(m => ({ default: m.NewsPage })))
 const AdminSocialPage      = lazy(() => import('@/pages/social/admin-social-moderation-page').then(m => ({ default: m.AdminSocialModerationPage })))
@@ -146,11 +127,13 @@ export function AppRoutes() {
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/my-votes" element={<MyVotesPage />} />
+            <Route path="/voter/social" element={<SocialFeedPage myPostsOnly={false} />} />
             <Route path="/account/creator-status" element={<CreatorApplicationStatusPage />} />
             <Route path="/elections" element={<ElectionsDiscoverPage />} />
 
             <Route element={<RoleGuard allow={['election_creator', 'super_admin']} />}>
               <Route path="/elections/creator" element={<CreatorDashboardPage />} />
+              <Route path="/elections/social" element={<SocialFeedPage myPostsOnly={false} />} />
               <Route path="/elections/wizard" element={<ElectionWizardPage />} />
               <Route path="/elections/:id/wizard" element={<ElectionWizardPage />} />
               <Route path="/elections/manage" element={<ElectionsManagePage />} />
@@ -166,6 +149,8 @@ export function AppRoutes() {
 
             <Route element={<RoleGuard allow={['super_admin']} />}>
               <Route path="/admin" element={<SuperAdminOverviewPage />} />
+              <Route path="/admin/social" element={<SocialFeedPage myPostsOnly={false} />} />
+              <Route path="/admin/social-moderation" element={<AdminSocialPage />} />
               <Route path="/admin/elections" element={<SuperAdminElectionsPage />} />
               <Route path="/admin/elections/:id/manage" element={<SuperAdminElectionManagePage />} />
               <Route path="/admin/creators" element={<SuperAdminCreatorsPage />} />
@@ -178,27 +163,27 @@ export function AppRoutes() {
           </Route>
         </Route>
 
-            {/* ── Social Media — PUBLIC (no login required to view) ────────── */}
-        <Route element={<AdaptiveSocialLayout />}>
-          {/* Public read routes — accessible to guests and logged-in users */}
-          <Route path="/social"                   element={<SocialFeedPage myPostsOnly={false} />} />
-          <Route path="/social/search"            element={<SocialSearchPage />} />
-          <Route path="/social/trending"          element={<SocialHashtagPage />} />
-          <Route path="/social/hashtag/:tag"      element={<SocialHashtagPage />} />
-          <Route path="/social/posts/:id"         element={<SocialPostDetailPage />} />
-          <Route path="/social/profile/:username" element={<SocialProfilePage />} />
-          <Route path="/social/news"              element={<NewsPage />} />
+        {/* ── Social Media — PUBLIC (no login required to view) ────────── */}
+        {/* SocialPageLayout shows guest navbar for guests, full dashboard for logged-in */}
+        <Route element={<SocialPageLayout />}>
+          <Route element={<SocialLayout />}>
+            {/* Public read routes — accessible to guests and logged-in users */}
+            <Route path="/social"                   element={<SocialFeedPage myPostsOnly={false} />} />
+            <Route path="/social/search"            element={<SocialSearchPage />} />
+            <Route path="/social/trending"          element={<SocialHashtagPage />} />
+            <Route path="/social/hashtag/:tag"      element={<SocialHashtagPage />} />
+            <Route path="/social/posts/:id"         element={<SocialPostDetailPage />} />
+            <Route path="/social/profile/:username" element={<SocialProfilePage />} />
+            <Route path="/social/news"              element={<NewsPage />} />
 
-          {/* Authenticated-only social routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/social/my-posts"        element={<SocialFeedPage myPostsOnly={true} />} />
-            <Route path="/social/following"       element={<SocialFeedPage myPostsOnly={false} />} />
-            <Route path="/social/notifications"   element={<SocialNotifPage />} />
-            <Route path="/social/bookmarks"       element={<SocialBookmarksPage />} />
-            <Route path="/social/drafts"          element={<SocialDraftsPage />} />
-            <Route path="/social/create"          element={<SocialCreatePage />} />
-            <Route element={<RoleGuard allow={['super_admin']} />}>
-              <Route path="/admin/social"         element={<AdminSocialPage />} />
+            {/* Authenticated-only social routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/social/my-posts"        element={<SocialFeedPage myPostsOnly={true} />} />
+              <Route path="/social/following"       element={<SocialFeedPage myPostsOnly={false} />} />
+              <Route path="/social/notifications"   element={<SocialNotifPage />} />
+              <Route path="/social/bookmarks"       element={<SocialBookmarksPage />} />
+              <Route path="/social/drafts"          element={<SocialDraftsPage />} />
+              <Route path="/social/create"          element={<SocialCreatePage />} />
             </Route>
           </Route>
         </Route>

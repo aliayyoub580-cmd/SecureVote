@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { APP_NAME, ROUTES } from '@/constants/routes'
+import { useAuth } from '@/contexts/auth-context'
 import { useTheme } from '@/contexts/theme-context'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +24,7 @@ const nav = [
 ]
 
 export function LandingNavbar({ search, onSearchChange }: LandingNavbarProps) {
+  const { user } = useAuth()
   const { resolved, setTheme } = useTheme()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -115,16 +117,22 @@ export function LandingNavbar({ search, onSearchChange }: LandingNavbarProps) {
             {resolved === 'dark' ? <Sun className="size-4.5" /> : <Moon className="size-4.5" />}
           </motion.button>
           
-          <div className="hidden sm:flex items-center gap-2">
-            <Button asChild variant="ghost" className="rounded-xl h-10 text-muted-foreground hover:text-foreground font-bold">
-              <Link to={ROUTES.login}>Sign In</Link>
+          {user ? (
+            <Button asChild className="rounded-xl h-10 premium-gradient px-5 font-bold shadow-md hover:scale-105 active:scale-95 transition-all">
+              <Link to={ROUTES.dashboard}>Dashboard</Link>
             </Button>
-            <Button asChild className="rounded-xl h-10 premium-gradient px-6 font-bold shadow-md hover:scale-105 active:scale-95 transition-all">
-              <Link to={ROUTES.register}>
-                Join Now
-              </Link>
-            </Button>
-          </div>
+          ) : (
+            <div className="hidden sm:flex items-center gap-2">
+              <Button asChild variant="ghost" className="rounded-xl h-10 text-muted-foreground hover:text-foreground font-bold">
+                <Link to={ROUTES.login}>Sign In</Link>
+              </Button>
+              <Button asChild className="rounded-xl h-10 premium-gradient px-6 font-bold shadow-md hover:scale-105 active:scale-95 transition-all">
+                <Link to={ROUTES.register}>
+                  Join Now
+                </Link>
+              </Button>
+            </div>
+          )}
 
           <Button
             type="button"

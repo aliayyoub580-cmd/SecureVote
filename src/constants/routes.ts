@@ -3,6 +3,10 @@ export const APP_NAME = 'SecureVote'
 export const ROUTES = {
   // ── Social ─────────────────────────────────────────────────────────────────
   social:                   '/social',
+  adminSocial:              '/admin/social',
+  adminSocialModeration:    '/admin/social-moderation',
+  creatorSocial:            '/elections/social',
+  voterSocial:              '/voter/social',
   socialCreate:             '/social/create',
   socialPost:               (id: string) => `/social/posts/${id}`,
   socialProfile:            (username: string) => `/social/profile/${username}`,
@@ -15,7 +19,7 @@ export const ROUTES = {
   socialTrending:           '/social/trending',
   socialNews:               '/social/news',
   landing:                  '/landing',
-  communityFeed:            '/community-feed',
+  communityFeed:            '/social',
   // ── Existing ───────────────────────────────────────────────────────────────
   home: '/',
   login: '/login',

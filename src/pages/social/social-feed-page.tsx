@@ -12,18 +12,17 @@ import { useAuth }              from '@/contexts/auth-context'
 import { socialInteractionsService } from '@/services/social.service'
 import type { FeedFilter } from '@/types/social'
 
-const GUEST_FILTERS: { value: FeedFilter; label: string }[] = [
-  { value: 'latest',           label: 'Latest'    },
-  { value: 'trending',         label: 'Trending'  },
+const FEED_FILTERS: { value: FeedFilter; label: string; authOnly?: boolean }[] = [
+  { value: 'latest',           label: 'Latest' },
+  { value: 'trending',         label: 'Trending' },
+  { value: 'following',        label: 'Following', authOnly: true },
   { value: 'election_updates', label: 'Elections' },
 ]
 
 export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean }) {
   const { user } = useAuth()
   
-  // When user is logged in, default feed to 'my_posts' mode
-  const isUserLoggedIn = Boolean(user)
-  const activeMyPosts = isUserLoggedIn || myPostsOnly
+  const activeMyPosts = myPostsOnly
 
   const [filter, setFilter] = React.useState<FeedFilter>(
     activeMyPosts ? 'my_posts' : 'latest'
@@ -60,8 +59,8 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
       {/* Auth guard modal — shown to guests who click an interaction */}
       <AuthGuardModal open={modalOpen} action={modalAction} onClose={closeModal} />
 
-      {/* Logged-in user profile header */}
-      {user && (
+      {/* Logged-in user profile header (only on My Posts view) */}
+      {user && activeMyPosts && (
         <SocialProfileHeader onCreatePost={handleCreatePost} />
       )}
 
@@ -133,16 +132,16 @@ export function SocialFeedPage({ myPostsOnly = false }: { myPostsOnly?: boolean 
         )}
       </AnimatePresence>
 
-      {/* Filter tabs — ONLY shown for guest visitors */}
-      {!user && (
-        <div className="flex items-center gap-1 bg-[var(--card)] border border-[var(--border)] rounded-xl p-1">
-          {GUEST_FILTERS.map(f => (
+      {/* Filter tabs — shown for community feed (guests & logged-in users) */}
+      {!activeMyPosts && (
+        <div className="flex items-center gap-1 bg-[var(--card)] border border-[var(--border)] rounded-xl p-1 overflow-x-auto no-scrollbar">
+          {FEED_FILTERS.filter(f => !f.authOnly || Boolean(user)).map(f => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex-1 min-w-[80px] py-1.5 px-3 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                 filter === f.value
-                  ? 'bg-[var(--accent-primary)] text-[var(--primary-foreground)] shadow-xs'
+                  ? 'bg-[var(--accent-primary)] text-[var(--primary-foreground)] shadow-xs font-bold'
                   : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
               }`}
             >
