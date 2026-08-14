@@ -203,7 +203,7 @@ export function VotePage() {
                 <ShieldCheck className="size-4" />
                 Secure Voting Session
               </div>
-              <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="size-2 rounded-full bg-[var(--accent-primary)] animate-pulse" />
             </div>
             <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter mb-4 leading-none">Voting Panel</h1>
             <p className="text-muted-foreground max-w-2xl text-lg font-medium leading-relaxed">
@@ -304,9 +304,9 @@ export function VotePage() {
         {/* Already Voted Notice */}
         {phase === 'voting' && alreadyVoted ? (
           <motion.div variants={item}>
-            <Card className="rounded-[2rem] border-emerald-500/20 bg-emerald-500/5 p-8 lg:p-12 shadow-sm relative overflow-hidden">
-              <div className="flex items-center gap-4 text-emerald-600 mb-6">
-                <div className="size-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+            <Card className="rounded-[2rem] border-[var(--accent-primary)]/20 bg-[var(--accent-primary)]/5 p-8 lg:p-12 shadow-sm relative overflow-hidden">
+              <div className="flex items-center gap-4 text-[var(--accent-primary)] mb-6">
+                <div className="size-12 rounded-xl bg-[var(--accent-primary)]/10 flex items-center justify-center border border-[var(--accent-primary)]/20">
                   <CheckCircle2 className="size-6" />
                 </div>
                 <CardTitle className="text-2xl font-bold tracking-tight">You have already voted</CardTitle>
@@ -415,7 +415,7 @@ export function VotePage() {
                       />
                       <div className="flex items-center justify-between mt-1 px-1">
                         {form.formState.errors.secretToken ? (
-                          <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest animate-pulse">Invalid Code Format</p>
+                          <p className="text-[9px] font-black text-[var(--accent-danger)] uppercase tracking-widest animate-pulse">Invalid Code Format</p>
                         ) : (
                           <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">Enter your secure voting ID sent to your email</p>
                         )}
@@ -479,8 +479,8 @@ export function VotePage() {
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ type: 'spring', damping: 25 }}
               >
-                <div className="size-24 rounded-[2rem] bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                  <CheckCircle2 className="size-12 text-emerald-600" />
+                <div className="size-24 rounded-[2rem] bg-[var(--accent-primary)]/10 flex items-center justify-center border border-[var(--accent-primary)]/20">
+                  <CheckCircle2 className="size-12 text-[var(--accent-primary)]" />
                 </div>
                 
                 <div className="space-y-4">
@@ -493,10 +493,10 @@ export function VotePage() {
                 <div className="pt-4 flex flex-col items-center gap-3">
                   <div className="flex items-center gap-1.5">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="size-1.5 rounded-full bg-emerald-500 animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />
+                      <div key={i} className="size-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />
                     ))}
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600/60">System Synchronized</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-primary)]/60">System Synchronized</span>
                 </div>
               </motion.div>
             </motion.div>

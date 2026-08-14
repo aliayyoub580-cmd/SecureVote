@@ -78,13 +78,13 @@ export function LandingFooter() {
         
         <div className="mt-8 flex flex-col items-center justify-between gap-6 sm:flex-row">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-emerald-500" />
+            <ShieldCheck className="size-4 text-[var(--accent-primary)]" />
             <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
               © {new Date().getFullYear()} {APP_NAME} Platform.
             </p>
           </div>
           <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-            <span>Status: <span className="text-emerald-500">Operational</span></span>
+            <span>Status: <span className="text-[var(--accent-primary)]">Operational</span></span>
           </div>
         </div>
       </div>

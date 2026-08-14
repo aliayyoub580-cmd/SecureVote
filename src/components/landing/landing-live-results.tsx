@@ -24,7 +24,7 @@ type LandingLiveResultsProps = {
   voteTotals: Record<string, number>
 }
 
-const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f43f5e', '#f59e0b', '#a855f7']
+const COLORS = ['var(--accent-primary)', 'var(--accent-secondary)', '#8b5cf6', 'var(--accent-danger)', '#f59e0b', '#a855f7']
 
 export function LandingLiveResults({ liveElections, preview, voteTotals }: LandingLiveResultsProps) {
   const { resolved } = useTheme()
@@ -61,8 +61,8 @@ export function LandingLiveResults({ liveElections, preview, voteTotals }: Landi
               <div className="mb-8 flex flex-wrap items-start justify-between gap-4 relative z-10">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-emerald-600">
+                    <div className="size-2 rounded-full bg-[var(--accent-primary)] animate-pulse" />
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--accent-primary)]">
                       Live Results
                     </p>
                   </div>
@@ -87,7 +87,7 @@ export function LandingLiveResults({ liveElections, preview, voteTotals }: Landi
                         type="category"
                         dataKey="name"
                         width={120}
-                        tick={{ fill: resolved === 'dark' ? '#71717a' : '#a1a1aa', fontSize: 11, fontWeight: 700 }}
+                        tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 700 }}
                         axisLine={false}
                         tickLine={false}
                       />

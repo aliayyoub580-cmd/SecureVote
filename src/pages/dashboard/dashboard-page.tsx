@@ -85,7 +85,7 @@ export function DashboardPage() {
           <motion.div variants={item}>
             <Card className="saas-card p-6">
               <div className="flex items-center gap-4">
-                <div className="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                <div className="size-10 rounded-lg bg-[var(--accent-info)]/10 flex items-center justify-center text-[var(--accent-info)]">
                    <Vote className="size-5" />
                 </div>
                 <div>
@@ -99,7 +99,7 @@ export function DashboardPage() {
           <motion.div variants={item}>
             <Card className="saas-card p-6">
               <div className="flex items-center gap-4">
-                <div className="size-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                <div className="size-10 rounded-lg bg-[var(--accent-primary)]/10 flex items-center justify-center text-[var(--accent-primary)]">
                    <Activity className="size-5" />
                 </div>
                 <div>
@@ -144,7 +144,7 @@ export function DashboardPage() {
       <motion.div variants={item} className="space-y-6">
         <div className="flex items-center justify-between">
            <h2 className="section-title">Active Elections</h2>
-           <Button variant="link" className="text-blue-400 hover:text-blue-300 px-0" asChild>
+           <Button variant="link" className="text-[var(--accent-info)] hover:text-[var(--accent-info)]/80 px-0" asChild>
              <Link to={ROUTES.elections}>View All <ArrowRight className="ml-2 size-4" /></Link>
            </Button>
         </div>

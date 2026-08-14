@@ -9,19 +9,19 @@ const features = [
     icon: ShieldCheck,
     title: 'Complete Privacy',
     body: 'Anonymous voting ensures your choice is never linked to your identity. Private and secure.',
-    color: 'text-emerald-500',
+    color: 'text-[var(--accent-primary)]',
   },
   {
     icon: Heart,
     title: 'Trust & Integrity',
     body: 'Every vote is securely recorded and verifiable. No one can change or tamper with the results.',
-    color: 'text-rose-500',
+    color: 'text-[var(--accent-danger)]',
   },
   {
     icon: Activity,
     title: 'Live Results',
     body: 'Track participation rates and see winners emerge in real-time with clear, easy-to-read charts.',
-    color: 'text-blue-500',
+    color: 'text-[var(--accent-secondary)]',
   },
   {
     icon: Zap,
@@ -33,13 +33,13 @@ const features = [
     icon: Globe,
     title: 'Work Anywhere',
     body: 'Works on any device. Your team can vote from their computer, tablet, or phone with ease.',
-    color: 'text-orange-500',
+    color: 'text-[var(--accent-info)]',
   },
   {
     icon: Smartphone,
     title: 'Mobile Ready',
     body: 'A beautiful and simple mobile experience designed for on-the-go voting and management.',
-    color: 'text-indigo-500',
+    color: 'text-[var(--accent-info)]',
   },
 ]
 

@@ -154,7 +154,7 @@ export function SuggestedUsers() {
                   onClick={() => handleFollowToggle(u.id, u.is_following)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
                     u.is_following
-                      ? 'bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-rose-500 hover:bg-rose-500/10'
+                      ? 'bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--accent-danger)] hover:bg-[var(--accent-danger)]/10'
                       : 'bg-[var(--accent-primary)] text-[var(--primary-foreground)] hover:opacity-90 shadow-xs'
                   }`}
                 >

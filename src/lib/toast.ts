@@ -38,7 +38,7 @@ export const toast = {
       title: 'Success',
       text: message,
       icon: 'success',
-      iconColor: '#10b981',
+      iconColor: 'var(--accent-success)',
       timer: 3000,
       timerProgressBar: true,
       ...formatOptions(options)
@@ -50,7 +50,7 @@ export const toast = {
       title: 'Error',
       text: message,
       icon: 'error',
-      iconColor: '#ef4444',
+      iconColor: 'var(--accent-danger)',
       ...formatOptions(options)
     })
   },
@@ -60,7 +60,7 @@ export const toast = {
       title: 'Info',
       text: message,
       icon: 'info',
-      iconColor: '#3b82f6',
+      iconColor: 'var(--accent-info)',
       ...formatOptions(options)
     })
   },
@@ -70,7 +70,7 @@ export const toast = {
       title: 'Warning',
       text: message,
       icon: 'warning',
-      iconColor: '#f59e0b',
+      iconColor: 'var(--accent-primary)',
       ...formatOptions(options)
     })
   },

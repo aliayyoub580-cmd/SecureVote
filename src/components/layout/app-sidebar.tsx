@@ -121,7 +121,7 @@ export function AppSidebar({ collapsed, onToggle, onNavigate }: AppSidebarProps)
                   <span className="text-sm font-medium text-[var(--foreground)] truncate leading-none">{profile?.full_name || 'User'}</span>
                   <span className="text-xs text-[var(--muted-foreground)] mt-1 capitalize">{profile?.role?.replace('_', ' ')}</span>
                 </div>
-                <Button variant="ghost" size="icon" className="size-8 rounded-lg text-[var(--muted-foreground)] hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="icon" className="size-8 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--accent-danger)] hover:bg-[var(--accent-danger)]/10 opacity-0 group-hover:opacity-100 transition-opacity">
                   <LogOut className="size-4" />
                 </Button>
               </>

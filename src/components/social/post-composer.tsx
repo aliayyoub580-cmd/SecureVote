@@ -298,7 +298,7 @@ export function PostComposer({ onSuccess, onCancel, initialDraftId, editPostId }
             {/* PDF preview */}
             {pdf && (
               <div className="flex items-center gap-2 p-2 bg-[#031F28] border border-[#0F4A5E] rounded-lg">
-                <FileText className="size-4 text-rose-400" />
+                <FileText className="size-4 text-[var(--accent-danger)]" />
                 <span className="text-xs text-[#EDF7F6] truncate flex-1">{pdf.name}</span>
                 <button onClick={() => setPdf(null)}><X className="size-3.5 text-[#7FA3AB]" /></button>
               </div>

@@ -137,7 +137,7 @@ export function SuperAdminOverviewPage() {
           value={(stats?.elections || 0) > 0 ? Math.max(1, Math.floor((stats?.elections || 0) * 0.4)) : 0}
           hint="Currently live"
           icon={Vote}
-          color="text-emerald-500"
+          color="text-[var(--accent-primary)]"
           index={1}
         />
         <AdminStatCard
@@ -153,7 +153,7 @@ export function SuperAdminOverviewPage() {
           value={stats?.profiles || 0}
           hint="Registered accounts"
           icon={Users}
-          color="text-blue-500"
+          color="text-[var(--accent-info)]"
           index={3}
         />
         <AdminStatCard
@@ -169,7 +169,7 @@ export function SuperAdminOverviewPage() {
           value="0"
           hint="Platform is secure"
           icon={ShieldAlert}
-          color="text-rose-500"
+          color="text-[var(--accent-danger)]"
           index={5}
         />
       </div>

@@ -177,7 +177,7 @@ export function ResultsPage() {
                 Live Performance
               </div>
               {isLiveWindow && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 text-[10px] font-black text-[var(--accent-primary)] uppercase tracking-widest">
                   <Globe className="size-3.5 animate-spin-slow" />
                   Synchronized
                 </div>
@@ -235,7 +235,7 @@ export function ResultsPage() {
             value={stats ? `${participationPct}%` : '—'}
             hint="Voter turnout percentage"
             delay={0.2}
-            className="text-emerald-500"
+            className="text-[var(--accent-primary)]"
           />
         </motion.div>
         <motion.div variants={item}>
@@ -245,7 +245,7 @@ export function ResultsPage() {
             value={displayPhase ? phaseLabel(displayPhase) : '—'}
             hint={election?.suspended ? 'Election suspended' : 'Election active'}
             delay={0.3}
-            className={cn(election?.suspended ? 'text-rose-500' : 'text-primary')}
+            className={cn(election?.suspended ? 'text-[var(--accent-danger)]' : 'text-primary')}
           />
         </motion.div>
       </div>

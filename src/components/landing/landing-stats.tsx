@@ -17,10 +17,10 @@ type LandingStatsStripProps = {
 export function LandingStatsStrip({ totalPublished, live, upcoming, completed, totalVotes }: LandingStatsStripProps) {
   const items = [
     { label: 'Total Elections', value: totalPublished, icon: Vote, color: 'text-primary' },
-    { label: 'Active Voting', value: live, icon: Activity, color: 'text-emerald-500' },
-    { label: 'Coming Soon', value: upcoming, icon: Calendar, color: 'text-blue-500' },
+    { label: 'Active Voting', value: live, icon: Activity, color: 'text-[var(--accent-primary)]' },
+    { label: 'Coming Soon', value: upcoming, icon: Calendar, color: 'text-[var(--accent-secondary)]' },
     { label: 'Completed', value: completed, icon: CheckCircle2, color: 'text-muted-foreground' },
-    { label: 'Total Ballots', value: totalVotes, icon: ShieldCheck, color: 'text-indigo-500' },
+    { label: 'Total Ballots', value: totalVotes, icon: ShieldCheck, color: 'text-[var(--accent-info)]' },
   ]
   return (
     <div className="relative border-y border-border bg-muted/30 py-20 mt-20 overflow-hidden transition-colors duration-500">
@@ -69,7 +69,7 @@ type LandingStatsChartsProps = {
   totalVotes: number
 }
 
-const COLORS = ['#10b981', '#3b82f6', '#6366f1']
+const COLORS = ['var(--accent-primary)', 'var(--accent-secondary)', 'var(--accent-info)']
 
 export function LandingStatsCharts({ live, upcoming, completed, totalVotes }: LandingStatsChartsProps) {
   const { resolved } = useTheme()
@@ -98,8 +98,8 @@ export function LandingStatsCharts({ live, upcoming, completed, totalVotes }: La
               <h4 className="text-xl font-bold text-foreground">Poll Distribution</h4>
               <p className="text-sm text-muted-foreground mt-1">Status overview of all elections</p>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-600">
-              <div className="size-2 rounded-full bg-emerald-500 animate-pulse" /> 
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 text-[10px] font-bold text-[var(--accent-primary)]">
+              <div className="size-2 rounded-full bg-[var(--accent-primary)] animate-pulse" />
               SYSTEM ACTIVE
             </div>
           </div>
@@ -107,8 +107,8 @@ export function LandingStatsCharts({ live, upcoming, completed, totalVotes }: La
           <div className="h-[300px] w-full relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: resolved === 'dark' ? '#71717a' : '#a1a1aa', fontSize: 11, fontWeight: 700 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: resolved === 'dark' ? '#71717a' : '#a1a1aa', fontSize: 11, fontWeight: 700 }} allowDecimals={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 700 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 700 }} allowDecimals={false} />
                 <Tooltip
                   cursor={{ fill: 'hsl(var(--muted))', opacity: 0.4 }}
                   contentStyle={{
@@ -151,7 +151,7 @@ export function LandingStatsCharts({ live, upcoming, completed, totalVotes }: La
                 <span className="text-6xl font-black text-foreground tracking-tighter">
                   {totalVotes.toLocaleString()}
                 </span>
-                <div className="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                <div className="px-2 py-1 rounded-lg bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 text-[10px] font-bold text-[var(--accent-primary)] flex items-center gap-1">
                   <TrendingUp className="size-3" /> +12%
                 </div>
               </div>

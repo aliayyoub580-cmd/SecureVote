@@ -127,8 +127,8 @@ export function SocialProfilePage() {
             ) : (
               <button onClick={handleFollow} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 following
-                  ? 'bg-[#0F4A5E] text-[#EDF7F6] hover:bg-rose-500/20 hover:text-rose-400'
-                  : 'bg-[#2EE6B8] text-[#031F28] hover:bg-[#2EE6B8]/90 shadow-[0_0_10px_rgba(46,230,184,0.2)]'
+                  ? 'bg-[var(--bg-card)] text-[var(--card-foreground)] hover:bg-[var(--accent-danger)]/20 hover:text-[var(--accent-danger)]'
+                  : 'bg-[var(--accent-primary)] text-[var(--primary-foreground)] hover:bg-[var(--accent-primary)]/90 shadow-[0_0_10px_rgba(216,154,0,0.2)]'
               }`}>
                 {following ? <><UserMinus className="size-3.5" /> Unfollow</> : <><UserPlus className="size-3.5" /> Follow</>}
               </button>

@@ -150,7 +150,7 @@ export function DocumentViewerModal({
           {/* File Metadata */}
           <div className="flex items-center gap-3 min-w-0">
             <div className={`size-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-              isPdf ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+              isPdf ? 'bg-[var(--accent-danger)]/20 text-[var(--accent-danger)] border border-[var(--accent-danger)]/30' : 'bg-[var(--accent-info)]/20 text-[var(--accent-info)] border border-[var(--accent-info)]/30'
             }`}>
               {isPdf ? 'PDF' : 'DOC'}
             </div>
@@ -240,12 +240,12 @@ export function DocumentViewerModal({
         <main className="flex-1 overflow-auto p-4 sm:p-8 flex items-center justify-center select-none bg-slate-950/80">
           {loading ? (
             <div className="flex flex-col items-center justify-center gap-3 text-slate-400 py-20">
-              <Loader2 className="size-8 animate-spin text-emerald-400" />
+              <Loader2 className="size-8 animate-spin text-[var(--accent-primary)]" />
               <p className="text-sm font-medium">Loading PDF document viewer...</p>
             </div>
           ) : errorMsg ? (
             <div className="flex flex-col items-center justify-center gap-4 text-center max-w-md p-8 bg-slate-900 border border-slate-800 rounded-3xl">
-              <div className="size-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+              <div className="size-14 rounded-2xl bg-[var(--accent-danger)]/10 border border-[var(--accent-danger)]/20 flex items-center justify-center text-[var(--accent-danger)]">
                 <FileText className="size-7" />
               </div>
               <div>

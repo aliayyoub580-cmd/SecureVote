@@ -189,11 +189,11 @@ function CommentItem({
             onClick={() => onLike(comment.id)}
             className={`flex items-center gap-1 text-[10px] font-medium transition-colors ${
               comment.user_liked
-                ? 'text-rose-500'
-                : 'text-[var(--muted-foreground)] hover:text-rose-500'
+                ? 'text-[var(--accent-danger)]'
+                : 'text-[var(--muted-foreground)] hover:text-[var(--accent-danger)]'
             }`}
           >
-            <Heart className={`size-3 ${comment.user_liked ? 'fill-rose-500' : ''}`} />
+            <Heart className={`size-3 ${comment.user_liked ? 'fill-[var(--accent-danger)]' : ''}`} />
             {comment.like_count > 0 && <span>{comment.like_count}</span>}
           </button>
 
@@ -220,7 +220,7 @@ function CommentItem({
           {(isOwner || adminId) && (
             <button
               onClick={() => onDelete(comment.id)}
-              className="flex items-center gap-1 text-[10px] font-medium text-[var(--muted-foreground)] hover:text-rose-500 transition-colors ml-auto"
+              className="flex items-center gap-1 text-[10px] font-medium text-[var(--muted-foreground)] hover:text-[var(--accent-danger)] transition-colors ml-auto"
             >
               <Trash2 className="size-3" />
             </button>

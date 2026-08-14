@@ -174,7 +174,7 @@ export function DocumentCard({ media }: DocumentCardProps) {
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center gap-3 text-center max-w-sm mx-auto p-6 bg-[#031F28]">
-            <FileText className="size-8 text-rose-400" />
+            <FileText className="size-8 text-[var(--accent-danger)]" />
             <p className="text-xs text-[#7FA3AB]">{error}</p>
           </div>
         ) : isPdf ? (
@@ -183,7 +183,7 @@ export function DocumentCard({ media }: DocumentCardProps) {
             <canvas ref={canvasRef} className="w-full h-auto block" />
             {renderingPage && (
               <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center">
-                <Loader2 className="size-6 animate-spin text-emerald-600" />
+                <Loader2 className="size-6 animate-spin text-[var(--accent-primary)]" />
               </div>
             )}
           </div>

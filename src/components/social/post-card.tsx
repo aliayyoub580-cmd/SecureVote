@@ -135,7 +135,7 @@ export function PostCard({ post, onLike, onBookmark, onDelete, onRepost, compact
                 onClick={handleFollowToggle}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
                   following
-                    ? 'bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-rose-500'
+                    ? 'bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--accent-danger)]'
                     : 'bg-[var(--accent-primary)] text-[var(--primary-foreground)] hover:opacity-90 shadow-xs'
                 }`}
               >
@@ -173,7 +173,7 @@ export function PostCard({ post, onLike, onBookmark, onDelete, onRepost, compact
                         <Pencil className="size-3.5" /> Edit
                       </Link>
                     )}
-                    <button onClick={handleDelete} className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors">
+                    <button onClick={handleDelete} className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-[var(--accent-danger)] hover:bg-[var(--accent-danger)]/10 rounded-lg transition-colors">
                       <Trash2 className="size-3.5" /> Delete
                     </button>
                   </>
@@ -184,7 +184,7 @@ export function PostCard({ post, onLike, onBookmark, onDelete, onRepost, compact
                   </button>
                 )}
                 {!isOwner && (
-                  <button onClick={handleReport} disabled={reporting} className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors">
+                  <button onClick={handleReport} disabled={reporting} className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-[var(--accent-danger)] hover:bg-[var(--accent-danger)]/10 rounded-lg transition-colors">
                     <Flag className="size-3.5" /> Report
                   </button>
                 )}
@@ -231,10 +231,10 @@ export function PostCard({ post, onLike, onBookmark, onDelete, onRepost, compact
         <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]">
           <div className="flex items-center gap-1">
             <ActionButton
-              icon={<Heart className={`size-4 ${post.user_liked ? 'fill-rose-500 text-rose-500' : ''}`} />}
+              icon={<Heart className={`size-4 ${post.user_liked ? 'fill-[var(--accent-danger)] text-[var(--accent-danger)]' : ''}`} />}
               count={post.like_count}
               active={post.user_liked}
-              activeClass="text-rose-500"
+              activeClass="text-[var(--accent-danger)]"
               onClick={() => onLike?.(post.id)}
               label="Like"
             />

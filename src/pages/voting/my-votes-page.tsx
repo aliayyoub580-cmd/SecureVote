@@ -230,9 +230,9 @@ export function MyVotesPage() {
 
       {/* Stats Cards Section */}
       <motion.div variants={item} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="saas-card p-6 border-blue-500/10 hover:border-blue-500/30">
+        <Card className="saas-card p-6 border-[var(--accent-info)]/10 hover:border-[var(--accent-info)]/30">
           <div className="flex items-center gap-4">
-            <div className="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+            <div className="size-10 rounded-lg bg-[var(--accent-info)]/10 flex items-center justify-center text-[var(--accent-info)]">
                <History className="size-5" />
             </div>
             <div>
@@ -241,9 +241,9 @@ export function MyVotesPage() {
             </div>
           </div>
         </Card>
-        <Card className="saas-card p-6 border-emerald-500/10 hover:border-emerald-500/30">
+        <Card className="saas-card p-6 border-[var(--accent-primary)]/10 hover:border-[var(--accent-primary)]/30">
           <div className="flex items-center gap-4">
-            <div className="size-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+            <div className="size-10 rounded-lg bg-[var(--accent-primary)]/10 flex items-center justify-center text-[var(--accent-primary)]">
                <Vote className="size-5" />
             </div>
             <div>
@@ -288,7 +288,7 @@ export function MyVotesPage() {
           </div>
         ) : joinedElections.length === 0 ? (
           <Card className="saas-card p-16 flex flex-col items-center justify-center text-center space-y-6">
-             <div className="size-20 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-2">
+             <div className="size-20 rounded-full bg-[var(--accent-info)]/10 flex items-center justify-center text-[var(--accent-info)] mb-2">
                 <Vote className="size-10" />
              </div>
              <div>

@@ -25,8 +25,8 @@ export function LandingHero({ totalVotes, totalUsers, totalElections }: LandingH
     <section ref={containerRef} className="relative min-h-screen flex items-center justify-center pt-32 pb-32 overflow-hidden bg-background transition-colors duration-500">
       {/* Subtle Background Accents */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] opacity-50" />
-        <div className="absolute bottom-0 left-0 w-full h-[600px] bg-[radial-gradient(circle_at_bottom_left,rgba(167,139,250,0.03)_0%,transparent_60%)] opacity-50" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-[radial-gradient(circle_at_center,rgba(216,154,0,0.05)_0%,transparent_70%)] opacity-50" />
+        <div className="absolute bottom-0 left-0 w-full h-[600px] bg-[radial-gradient(circle_at_bottom_left,rgba(216,154,0,0.03)_0%,transparent_60%)] opacity-50" />
       </div>
       
       {/* Decorative Gradients */}
@@ -50,9 +50,9 @@ export function LandingHero({ totalVotes, totalUsers, totalElections }: LandingH
           >
             <div className="flex gap-2 mr-1">
               {[
-                { icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                { icon: ShieldCheck, color: 'text-[var(--accent-primary)]', bg: 'bg-[var(--accent-primary)]/10' },
                 { icon: Lock, color: 'text-primary', bg: 'bg-primary/10' },
-                { icon: CheckCircle2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                { icon: CheckCircle2, color: 'text-[var(--accent-secondary)]', bg: 'bg-[var(--accent-secondary)]/10' },
               ].map((item, i) => (
                 <div key={i} className={`size-5 rounded-full border border-border ${item.bg} flex items-center justify-center`}>
                   <item.icon className={`size-3 ${item.color}`} />
@@ -129,7 +129,7 @@ export function LandingHero({ totalVotes, totalUsers, totalElections }: LandingH
                 <div className="flex items-center gap-6">
                   <div className="hidden md:flex items-center gap-6">
                     <div className="flex flex-col items-end">
-                      <span className="text-xs font-black text-emerald-500">Live</span>
+                      <span className="text-xs font-black text-[var(--accent-primary)]">Live</span>
                       <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Status</span>
                     </div>
                     <div className="h-8 w-px bg-border" />
@@ -148,8 +148,8 @@ export function LandingHero({ totalVotes, totalUsers, totalElections }: LandingH
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 relative z-10">
                 {[
                   { name: 'Total Votes', stats: totalVotes.toLocaleString(), growth: 'Live', icon: Globe, color: 'text-primary' },
-                  { name: 'Active Users', stats: totalUsers.toLocaleString(), growth: 'Verified', icon: Zap, color: 'text-blue-500' },
-                  { name: 'Total Elections', stats: totalElections.toLocaleString(), growth: 'Active', icon: ShieldCheck, color: 'text-emerald-500' },
+                  { name: 'Active Users', stats: totalUsers.toLocaleString(), growth: 'Verified', icon: Zap, color: 'text-[var(--accent-secondary)]' },
+                  { name: 'Total Elections', stats: totalElections.toLocaleString(), growth: 'Active', icon: ShieldCheck, color: 'text-[var(--accent-primary)]' },
                 ].map((item, i) => (
                   <motion.div 
                     key={i} 

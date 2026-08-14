@@ -173,7 +173,7 @@ export function UsersPage() {
       cell: (r) => (
         <span className={cn(
           "px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border",
-          r.is_blocked ? "bg-rose-500/10 text-rose-500 border-rose-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+          r.is_blocked ? "bg-[var(--accent-danger)]/10 text-[var(--accent-danger)] border-[var(--accent-danger)]/20" : "bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border-[var(--accent-primary)]/20"
         )}>
           {r.is_blocked ? 'Blocked' : 'Active'}
         </span>
@@ -211,7 +211,7 @@ export function UsersPage() {
             onClick={() => void toggleBlock(r)}
             className={cn(
               "size-9 rounded-lg transition-all border",
-              r.is_blocked ? "bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500/20 hover:text-rose-600" : "bg-[var(--background)] text-[var(--muted-foreground)] border-[var(--border)] hover:text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/20"
+              r.is_blocked ? "bg-[var(--accent-danger)]/10 text-[var(--accent-danger)] border-[var(--accent-danger)]/20 hover:bg-[var(--accent-danger)]/20 hover:text-[var(--accent-danger)]" : "bg-[var(--background)] text-[var(--muted-foreground)] border-[var(--border)] hover:text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10 hover:border-[var(--accent-primary)]/20"
             )}
           >
             {r.is_blocked ? <UserCheck className="size-4" /> : <Ban className="size-4" />}

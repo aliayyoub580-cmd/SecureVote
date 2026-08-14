@@ -96,15 +96,15 @@ export function LandingElectionCard({ election, voteCount, className }: LandingE
 
   const badge =
     phase === 'voting' ? (
-      <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-600">
+      <span className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--accent-primary)]">
         <span className="relative flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-          <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--accent-primary)] opacity-60" />
+          <span className="relative inline-flex size-2 rounded-full bg-[var(--accent-primary)]" />
         </span>
         Voting Live
       </span>
     ) : phase === 'scheduled' ? (
-      <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-600">
+      <span className="rounded-full bg-[var(--accent-secondary)]/10 border border-[var(--accent-secondary)]/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--accent-secondary)]">
         Coming Soon
       </span>
     ) : (
@@ -162,7 +162,7 @@ export function LandingElectionCard({ election, voteCount, className }: LandingE
           <div className="flex flex-col gap-1">
             <span className="uppercase tracking-widest text-[9px] font-bold text-muted-foreground">Total Votes</span>
             <span className="flex items-center gap-2 text-xs font-bold text-foreground">
-              <BarChart2 className="size-3.5 text-emerald-500" />
+              <BarChart2 className="size-3.5 text-[var(--accent-primary)]" />
               {voteCount.toLocaleString()}
             </span>
           </div>

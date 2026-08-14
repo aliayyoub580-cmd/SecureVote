@@ -86,7 +86,7 @@ export function NotificationsPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleClearAll}
-                className="h-9 sm:h-10 rounded-xl px-3 sm:px-4 font-bold border-border bg-card/50 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/20 transition-all text-xs shrink-0"
+                className="h-9 sm:h-10 rounded-xl px-3 sm:px-4 font-bold border-border bg-card/50 hover:bg-[var(--accent-danger)]/10 hover:text-[var(--accent-danger)] hover:border-[var(--accent-danger)]/20 transition-all text-xs shrink-0"
               >
                 Clear all
               </Button>
@@ -94,7 +94,7 @@ export function NotificationsPage() {
           </div>
           <div className="flex items-center gap-2">
             <div className="px-3 py-1.5 rounded-xl bg-muted/50 border border-border flex items-center gap-2">
-              <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="size-2 rounded-full bg-[var(--accent-primary)] animate-pulse" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Realtime Active</span>
             </div>
           </div>

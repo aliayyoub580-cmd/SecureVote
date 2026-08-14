@@ -179,8 +179,8 @@ export function SuperAdminCreatorsPage() {
                       <span className={cn(
                         "px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border",
                         app.creator_application_status === 'pending' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                        app.creator_application_status === 'approved' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                        "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                        app.creator_application_status === 'approved' ? "bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border-[var(--accent-primary)]/20" :
+                        "bg-[var(--accent-danger)]/10 text-[var(--accent-danger)] border-[var(--accent-danger)]/20"
                       )}>
                         {app.creator_application_status}
                       </span>
@@ -200,7 +200,7 @@ export function SuperAdminCreatorsPage() {
                     </div>
 
                     {app.creator_application_status === 'rejected' && app.creator_application_rejection_reason && (
-                      <div className="mt-4 p-3 bg-rose-500/5 rounded-lg border border-rose-500/10 text-xs text-rose-500/80 font-medium">
+                      <div className="mt-4 p-3 bg-[var(--accent-danger)]/5 rounded-lg border border-[var(--accent-danger)]/10 text-xs text-[var(--accent-danger)]/80 font-medium">
                         Reason: {app.creator_application_rejection_reason}
                       </div>
                     )}
@@ -209,9 +209,9 @@ export function SuperAdminCreatorsPage() {
                   <CardContent className="p-5 pt-0 mt-auto">
                     {app.creator_application_status === 'pending' ? (
                       <div className="grid grid-cols-2 gap-2 pt-4 border-t border-[var(--border)]">
-                        <Button 
+                        <Button
                           onClick={() => handleApprove(app.id)}
-                          className="h-9 rounded-lg font-bold text-[10px] uppercase tracking-widest bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                          className="h-9 rounded-lg font-bold text-[10px] uppercase tracking-widest bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/90 text-[var(--primary-foreground)] shadow-[0_0_15px_rgba(216,154,0,0.2)]"
                         >
                           Approve
                         </Button>
