@@ -142,11 +142,11 @@ export function ElectionWizardPage() {
       saveTimer.current = window.setTimeout(() => {
         void (async () => {
           try {
-            const isApproved = election?.status === 'approved'
+            const isLocked = election?.status === 'active' || election?.status === 'closed'
             const plain = stripHtml(values.descriptionHtml || '')
 
             // Limit increase validation for autosave
-            if (isApproved && election) {
+            if (election?.status === 'approved' && election) {
               const prevMax = election.max_voters
               const newMaxVal = values.maxVoters?.trim() ? parseInt(values.maxVoters, 10) : null
               if (prevMax !== null) {
@@ -169,7 +169,7 @@ export function ElectionWizardPage() {
               visibility: values.visibility,
             }
 
-            if (!isApproved) {
+            if (!isLocked) {
               updatePayload.title = values.title
               updatePayload.description = plain ? plain.slice(0, 4000) : null
               updatePayload.description_html = values.descriptionHtml || null
@@ -197,10 +197,10 @@ export function ElectionWizardPage() {
   }, [watched, electionId, scheduleAutosave])
 
   const persistNow = async (values: ElectionWizardForm, eid: string) => {
-    const isApproved = election?.status === 'approved'
+    const isLocked = election?.status === 'active' || election?.status === 'closed'
     const plain = stripHtml(values.descriptionHtml || '')
 
-    if (isApproved && election) {
+    if (election?.status === 'approved' && election) {
       const prevMax = election.max_voters
       const newMaxVal = values.maxVoters?.trim() ? parseInt(values.maxVoters, 10) : null
       if (prevMax !== null) {
@@ -218,7 +218,7 @@ export function ElectionWizardPage() {
       max_voters: (values.maxVoters !== undefined && values.maxVoters !== null && String(values.maxVoters).trim() !== '') ? parseInt(String(values.maxVoters), 10) : null,
     }
 
-    if (!isApproved) {
+    if (!isLocked) {
       updatePayload.title = values.title
       updatePayload.description = plain ? plain.slice(0, 4000) : null
       updatePayload.description_html = values.descriptionHtml || null
@@ -507,7 +507,7 @@ export function ElectionWizardPage() {
               <CardContent className="p-5 sm:p-8 lg:p-10 pt-0 space-y-6 sm:space-y-8">
                 <div className="space-y-3">
                   <Label htmlFor="title" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Election Title</Label>
-                  <Input id="title" placeholder="e.g. Board of Directors 2026" className="h-14 rounded-xl bg-muted/50 border-border text-lg font-bold tracking-tight focus:ring-primary/20" {...form.register('title')} disabled={election?.status === 'approved'} />
+                  <Input id="title" placeholder="e.g. Board of Directors 2026" className="h-14 rounded-xl bg-muted/50 border-border text-lg font-bold tracking-tight focus:ring-primary/20" {...form.register('title')} disabled={election?.status === 'active' || election?.status === 'closed'} />
                   {form.formState.errors.title ? (
                     <p className="text-xs font-bold text-rose-500 ml-1">{form.formState.errors.title.message}</p>
                   ) : null}
@@ -519,7 +519,7 @@ export function ElectionWizardPage() {
                     control={form.control}
                     render={({ field }) => (
                       <div className="rounded-2xl border border-border bg-muted/20 overflow-hidden">
-                        <RichTextField value={field.value} onChange={field.onChange} disabled={form.formState.isSubmitting || election?.status === 'approved'} />
+                        <RichTextField value={field.value} onChange={field.onChange} disabled={form.formState.isSubmitting || election?.status === 'active' || election?.status === 'closed'} />
                       </div>
                     )}
                   />
@@ -527,7 +527,7 @@ export function ElectionWizardPage() {
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-3">
                     <Label htmlFor="category" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Category</Label>
-                    <Input id="category" placeholder="e.g. Internal" className="h-14 rounded-xl bg-muted/50 border-border font-bold" {...form.register('category')} disabled={election?.status === 'approved'} />
+                    <Input id="category" placeholder="e.g. Internal" className="h-14 rounded-xl bg-muted/50 border-border font-bold" {...form.register('category')} disabled={election?.status === 'active' || election?.status === 'closed'} />
                   </div>
                   <div className="space-y-3">
                     <Label htmlFor="organization" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Organization</Label>
@@ -536,7 +536,7 @@ export function ElectionWizardPage() {
                       placeholder="e.g. My Company Inc."
                       className="h-14 rounded-xl bg-muted/50 border-border font-bold"
                       {...form.register('organization')}
-                      disabled={election?.status === 'approved'}
+                      disabled={election?.status === 'active' || election?.status === 'closed'}
                     />
                   </div>
                 </div>
@@ -656,9 +656,9 @@ export function ElectionWizardPage() {
                     onChange={(e) => setPollTitle(e.target.value)}
                     placeholder="Section Title (e.g. Board Member)"
                     className="h-14 rounded-xl bg-muted/50 border-border text-base font-bold flex-1"
-                    disabled={election?.status === 'approved'}
+                    disabled={election?.status === 'active' || election?.status === 'closed'}
                   />
-                  <Button type="button" className="h-14 rounded-xl premium-gradient px-8 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-sm" onClick={() => void addPoll()} disabled={election?.status === 'approved'}>
+                  <Button type="button" className="h-14 rounded-xl premium-gradient px-8 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-sm" onClick={() => void addPoll()} disabled={election?.status === 'active' || election?.status === 'closed'}>
                     <Plus className="size-4" strokeWidth={3} /> Add Section
                   </Button>
                 </div>
@@ -691,7 +691,7 @@ export function ElectionWizardPage() {
                               id={`comments-${p.id}`}
                               checked={p.allow_comments}
                               onCheckedChange={(checked) => void togglePollComments(p, checked)}
-                              disabled={election?.status === 'approved'}
+                              disabled={election?.status === 'active' || election?.status === 'closed'}
                             />
                             <Label htmlFor={`comments-${p.id}`} className="text-xs font-bold text-muted-foreground cursor-pointer">
                               Allow voters to leave comments for this section
@@ -703,12 +703,12 @@ export function ElectionWizardPage() {
                           <Button asChild size="sm" variant="ghost" className="h-9 rounded-lg hover:bg-primary/10 hover:text-primary font-bold text-xs">
                             <Link to={ROUTES.electionCandidates(electionId)}>Candidates</Link>
                           </Button>
-                          {election?.status !== 'approved' ? (
+                          {election?.status !== 'active' && election?.status !== 'closed' ? (
                             <Button type="button" size="icon" variant="ghost" className="size-9 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all" onClick={() => void removePoll(p)}>
                               <Trash2 className="size-4" />
                             </Button>
                           ) : (
-                            <span className="text-[9px] font-bold uppercase text-muted-foreground bg-muted border border-border px-3 py-1.5 rounded-lg select-none">Approved</span>
+                            <span className="text-[9px] font-bold uppercase text-muted-foreground bg-muted border border-border px-3 py-1.5 rounded-lg select-none">Locked</span>
                           )}
                         </div>
                       </li>

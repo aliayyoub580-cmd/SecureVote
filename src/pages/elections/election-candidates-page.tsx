@@ -226,18 +226,18 @@ export function ElectionCandidatesPage() {
         <div className="flex flex-wrap gap-4">
           <Button asChild variant="outline" className="rounded-xl h-12 px-6 font-bold uppercase tracking-widest text-[10px]">
             <Link 
-              to={['draft', 'pending_approval', 'rejected'].includes(electionStatus) ? `${ROUTES.electionWizard(id)}?step=3` : ROUTES.electionEdit(id)} 
+              to={!['active', 'closed'].includes(electionStatus) ? `${ROUTES.electionWizard(id)}?step=3` : ROUTES.electionEdit(id)} 
               className="flex items-center gap-2"
             >
               <ArrowLeft className="size-3.5" strokeWidth={3} />
-              {['draft', 'pending_approval', 'rejected'].includes(electionStatus) ? 'Back to Wizard' : 'Back to Control Panel'}
+              {!['active', 'closed'].includes(electionStatus) ? 'Back to Wizard' : 'Back to Control Panel'}
             </Link>
           </Button>
           <Button
             type="button"
             className="rounded-xl premium-gradient h-12 px-6 font-bold uppercase tracking-widest text-[10px] shadow-lg hover:scale-105 transition-all gap-2"
             onClick={openAdd}
-            disabled={!polls.length || ['approved', 'active', 'closed'].includes(electionStatus)}
+            disabled={!polls.length || ['active', 'closed'].includes(electionStatus)}
           >
             <Plus className="size-4" strokeWidth={3} />
             Add Candidate
@@ -270,7 +270,7 @@ export function ElectionCandidatesPage() {
               <div className="space-y-16">
                 {polls.map((p) => {
                   const list = rows.filter((c) => c.poll_id === p.id)
-                  const isLocked = ['approved', 'active', 'closed'].includes(electionStatus)
+                  const isLocked = ['active', 'closed'].includes(electionStatus)
                   return (
                     <section key={p.id} className="space-y-8">
                       <div className="flex items-center gap-4">
