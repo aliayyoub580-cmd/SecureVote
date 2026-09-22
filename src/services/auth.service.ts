@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { emailService } from './email.service'
 import { setAuthPersistMode, type AuthPersistMode } from '@/lib/supabase/auth-storage'
 
@@ -17,46 +17,41 @@ export const authService = {
     const email = params.email.trim().toLowerCase()
     let userId: string | null = null
     let createdUser: any = null
+    let apiSuccess = false
 
-    // 1. If supabaseAdmin is available, create the user pre-confirmed (email_confirm: true).
-    // This completely bypasses Supabase confirmation emails, avoids over_email_send_rate_limit,
-    // and eliminates OTP verification entirely.
-    if (supabaseAdmin) {
-      const { data: adminData, error: adminError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password: params.password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: params.fullName,
-          phone: params.phone || '',
-          organization: params.organization || '',
-          account_type: params.accountType,
-        },
+    // 1. Call serverless registration endpoint (/api/register).
+    // This runs in Node.js with admin rights, creating the user pre-confirmed (email_confirm: true),
+    // bypassing Supabase email rate limits, removing secret key from the browser, and eliminating OTP.
+    try {
+      const resp = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password: params.password,
+          fullName: params.fullName,
+          phone: params.phone,
+          organization: params.organization,
+          accountType: params.accountType,
+        }),
       })
 
-      if (adminError) {
-        const msg = adminError.message ?? ''
-        const code = (adminError as any).code ?? ''
-        if (
-          code === 'unexpected_failure' ||
-          msg.toLowerCase().includes('database error saving new user') ||
-          msg.toLowerCase().includes('already registered') ||
-          msg.toLowerCase().includes('already exists')
-        ) {
-          return {
-            data: null,
-            error: Object.assign(
-              new Error('This email is already registered. Please sign in or use "Forgot Password" to reset your password.'),
-              { __isAuthError: true }
-            ) as any,
-          }
+      const result = await resp.json().catch(() => ({}))
+      if (resp.ok && result.success) {
+        apiSuccess = true
+        createdUser = result.user
+        userId = result.user?.id ?? null
+      } else if (result.error) {
+        return {
+          data: null,
+          error: Object.assign(new Error(result.error), { __isAuthError: true }) as any,
         }
-        return { data: null, error: adminError }
       }
+    } catch {
+      // Network or environment fallback
+    }
 
-      createdUser = adminData.user
-      userId = adminData.user?.id ?? null
-    } else {
+    if (!apiSuccess) {
       // Fallback: register via standard Supabase auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,

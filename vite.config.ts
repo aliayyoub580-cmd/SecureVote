@@ -3,11 +3,35 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
+function registerDevPlugin() {
+  return {
+    name: 'register-dev-api',
+    configureServer(server: any) {
+      server.middlewares.use(async (req: any, res: any, next: any) => {
+        if (req.url === '/api/register' && req.method === 'POST') {
+          try {
+            const chunks: Buffer[] = []
+            for await (const chunk of req) chunks.push(chunk)
+            req.body = JSON.parse(Buffer.concat(chunks).toString())
+            const { default: handler } = await import('./api/register.js')
+            await handler(req, res)
+          } catch (e: any) {
+            res.statusCode = 500
+            res.end(JSON.stringify({ error: e.message }))
+          }
+          return
+        }
+        next()
+      })
+    },
+  }
+}
+
 export default defineConfig({
   server: {
     port: parseInt(process.env.PORT || '5173', 10),
   },
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), registerDevPlugin()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
