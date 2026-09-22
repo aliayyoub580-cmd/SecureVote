@@ -6,10 +6,8 @@ import { ROUTES } from '@/constants/routes'
 import { useAuth } from '@/contexts/auth-context'
 import { ensureAuthSession } from '@/middleware/auth-session'
 
-const requireEmailVerification = import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION === 'true'
-
 export function ProtectedRoute() {
-  const { user, loading, sessionValidated, isEmailVerified } = useAuth()
+  const { user, loading, sessionValidated } = useAuth()
   const [checking, setChecking] = React.useState(true)
   const [sessionOk, setSessionOk] = React.useState(true)
 
@@ -45,10 +43,6 @@ export function ProtectedRoute() {
 
   if (!sessionOk) {
     return <Navigate to="/login" replace />
-  }
-
-  if (requireEmailVerification && !isEmailVerified) {
-    return <Navigate to={ROUTES.verifyEmail} replace state={{ email: user.email }} />
   }
 
   return <Outlet />

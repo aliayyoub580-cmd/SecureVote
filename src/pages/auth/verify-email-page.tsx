@@ -20,6 +20,17 @@ export function VerifyEmailPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
+  // Auto-redirect if user already has an active session or arrives here
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate(ROUTES.dashboard, { replace: true })
+      } else if (!email) {
+        navigate(ROUTES.login, { replace: true })
+      }
+    })
+  }, [email, navigate])
+
   // Handle countdown
   useEffect(() => {
     if (countdown > 0) {

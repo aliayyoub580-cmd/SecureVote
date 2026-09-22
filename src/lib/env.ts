@@ -1,6 +1,7 @@
 export type PublicEnv = {
   supabaseUrl: string
   supabaseAnonKey: string
+  supabaseServiceRoleKey: string
   turnstileSiteKey: string | undefined
   frontendUrl: string
   isProduction: boolean
@@ -19,6 +20,7 @@ export function getPublicEnv(): PublicEnv {
 
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? '').trim()
   const supabaseAnonKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim()
+  const supabaseServiceRoleKey = String(import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
   const turnstileRaw = String(import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '').trim()
   
   // Cloudflare Turnstile site keys strictly start with 0x, 1x, 2x, or 3x
@@ -48,6 +50,6 @@ export function getPublicEnv(): PublicEnv {
     }
   }
 
-  cached = { supabaseUrl, supabaseAnonKey, turnstileSiteKey, frontendUrl, isProduction, strictEnv }
+  cached = { supabaseUrl, supabaseAnonKey, supabaseServiceRoleKey, turnstileSiteKey, frontendUrl, isProduction, strictEnv }
   return cached
 }

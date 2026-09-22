@@ -96,16 +96,26 @@ export function RegisterPage() {
     setAlreadyRegisteredEmail(null)
     resetClientAuthRateLimit('register')
     void auditService.log(
-      'auth.signup_verify_pending',
+      'auth.register',
       'session',
       null,
-      { email_domain: values.email.split('@')[1] ?? 'unknown', captcha: Boolean(turnstileSiteKey) },
+      { email_domain: values.email.split('@')[1] ?? 'unknown', captcha: Boolean(turnstileSiteKey), role: values.accountType },
       { enrichClient: true },
     )
-    toast.success('Verification code sent!', {
-      description: 'Please check your inbox for the 6-digit code.',
+    toast.success('Account created successfully!', {
+      description: 'Welcome to SecureVote!',
     })
-    void navigate(ROUTES.verifyEmail, { replace: true, state: { email: values.email } })
+
+    let destination = ROUTES.dashboard
+    if (values.accountType === 'request_creator') {
+      destination = ROUTES.creatorDashboard
+    }
+
+    if (data?.session) {
+      void navigate(destination, { replace: true })
+    } else {
+      void navigate(ROUTES.login, { replace: true })
+    }
   })
 
   return (

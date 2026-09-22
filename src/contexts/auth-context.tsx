@@ -171,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.location.replace('/login')
   }, [])
 
-  const isEmailVerified = Boolean(state.user?.email_confirmed_at)
+  const isEmailVerified = Boolean(state.user)
   const isCreatorApplicationPending = state.profile?.creator_application_status === 'pending'
 
   const value = React.useMemo(

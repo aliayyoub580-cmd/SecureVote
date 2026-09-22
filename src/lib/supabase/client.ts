@@ -5,7 +5,7 @@ import type { Database } from '@/types/database'
 
 import { supabaseAuthStorage } from '@/lib/supabase/auth-storage'
 
-const { supabaseUrl, supabaseAnonKey } = getPublicEnv()
+const { supabaseUrl, supabaseAnonKey, supabaseServiceRoleKey } = getPublicEnv()
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
@@ -22,3 +22,13 @@ export const supabase = createClient<Database>(supabaseUrl || '', supabaseAnonKe
     flowType: 'pkce',
   },
 })
+
+export const supabaseAdmin = supabaseServiceRoleKey && supabaseUrl
+  ? createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : null
+

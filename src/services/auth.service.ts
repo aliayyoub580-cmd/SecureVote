@@ -1,9 +1,9 @@
-import { supabase } from '@/lib/supabase/client'
+import { supabase, supabaseAdmin } from '@/lib/supabase/client'
 import { emailService } from './email.service'
 import { setAuthPersistMode, type AuthPersistMode } from '@/lib/supabase/auth-storage'
 
 /**
- * 100% Reliable & Native Auth Service (EmailJS OTP + Native Supabase Security)
+ * Authentication Service (Direct Registration & Auto-Login without Confirmation/OTP locks)
  */
 export const authService = {
   async signUp(params: {
@@ -14,87 +14,127 @@ export const authService = {
     organization?: string
     accountType: 'voter' | 'request_creator'
   }) {
-    // 1. Register natively via Supabase Auth.
-    // This creates the user in auth.users with the correct GoTrue bcrypt hashing natively.
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: params.email,
-      password: params.password,
-      options: {
-        data: {
+    const email = params.email.trim().toLowerCase()
+    let userId: string | null = null
+    let createdUser: any = null
+
+    // 1. If supabaseAdmin is available, create the user pre-confirmed (email_confirm: true).
+    // This completely bypasses Supabase confirmation emails, avoids over_email_send_rate_limit,
+    // and eliminates OTP verification entirely.
+    if (supabaseAdmin) {
+      const { data: adminData, error: adminError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: params.password,
+        email_confirm: true,
+        user_metadata: {
           full_name: params.fullName,
           phone: params.phone || '',
           organization: params.organization || '',
-          account_type: params.accountType
-        }
-      }
-    })
+          account_type: params.accountType,
+        },
+      })
 
-    if (signUpError) {
-      const msg = signUpError.message ?? ''
-      const code = (signUpError as any).code ?? ''
-      // "Database error saving new user" (unexpected_failure) = user already exists with confirmed email
-      if (
-        code === 'unexpected_failure' ||
-        msg.toLowerCase().includes('database error saving new user') ||
-        msg.toLowerCase().includes('already registered') ||
-        msg.toLowerCase().includes('already exists')
-      ) {
+      if (adminError) {
+        const msg = adminError.message ?? ''
+        const code = (adminError as any).code ?? ''
+        if (
+          code === 'unexpected_failure' ||
+          msg.toLowerCase().includes('database error saving new user') ||
+          msg.toLowerCase().includes('already registered') ||
+          msg.toLowerCase().includes('already exists')
+        ) {
+          return {
+            data: null,
+            error: Object.assign(
+              new Error('This email is already registered. Please sign in or use "Forgot Password" to reset your password.'),
+              { __isAuthError: true }
+            ) as any,
+          }
+        }
+        return { data: null, error: adminError }
+      }
+
+      createdUser = adminData.user
+      userId = adminData.user?.id ?? null
+    } else {
+      // Fallback: register via standard Supabase auth
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: params.password,
+        options: {
+          data: {
+            full_name: params.fullName,
+            phone: params.phone || '',
+            organization: params.organization || '',
+            account_type: params.accountType,
+          },
+        },
+      })
+
+      if (signUpError) {
+        const msg = signUpError.message ?? ''
+        const code = (signUpError as any).code ?? ''
+        if (
+          code === 'unexpected_failure' ||
+          msg.toLowerCase().includes('database error saving new user') ||
+          msg.toLowerCase().includes('already registered') ||
+          msg.toLowerCase().includes('already exists')
+        ) {
+          return {
+            data: null,
+            error: Object.assign(
+              new Error('This email is already registered. Please sign in or use "Forgot Password" to reset your password.'),
+              { __isAuthError: true }
+            ) as any,
+          }
+        }
+        return { data: null, error: signUpError }
+      }
+
+      if (!signUpData.user || (signUpData.user.identities && signUpData.user.identities.length === 0)) {
         return {
           data: null,
-          error: Object.assign(
-            new Error('This email is already registered. Please sign in or use "Forgot Password" to reset your password.'),
-            { __isAuthError: true }
-          ) as any,
+          error: Object.assign(new Error('This email is already registered. Please sign in instead.'), { __isAuthError: true }) as any,
         }
       }
-      return { data: null, error: signUpError }
+
+      createdUser = signUpData.user
+      userId = signUpData.user.id
     }
 
-    // Supabase returns identities:[] (fake success) when email confirmation is OFF
-    // and the user already exists. Detect this and surface a clear error.
-    if (!signUpData.user || (signUpData.user.identities && signUpData.user.identities.length === 0)) {
-      await supabase.auth.signOut()
-      return { data: null, error: Object.assign(new Error('This email is already registered. Please sign in instead.'), { __isAuthError: true }) as any }
+    // 2. Ensure public.profiles record is correctly populated
+    if (userId) {
+      try {
+        const role = params.accountType === 'request_creator' ? 'election_creator' : 'voter'
+        const creatorStatus = params.accountType === 'request_creator' ? 'pending' : 'none'
+        await supabase.from('profiles').upsert(
+          {
+            id: userId,
+            email,
+            full_name: params.fullName,
+            phone: params.phone?.trim() || null,
+            organization: params.organization?.trim() || null,
+            role,
+            creator_application_status: creatorStatus,
+          },
+          { onConflict: 'id' },
+        )
+      } catch (err) {
+        console.warn('Profile upsert notice:', err)
+      }
     }
 
-    // Immediately sign out to clear the session so they are locked out until OTP verification succeeds.
-    await supabase.auth.signOut()
+    // 3. Immediately log the user in so they have an active session without OTP or verification steps
+    const { data: signInData, error: signInError } = await authService.signIn(email, params.password, true)
 
-    // 2. Generate and store our OTP code for verification
-    const otp = emailService.generateOTP()
-
-    // Store in sessionStorage as a fail-safe client fallback
-    try {
-      sessionStorage.setItem(`otp_${params.email.toLowerCase()}`, JSON.stringify({
-        otp,
-        password: params.password,
-        fullName: params.fullName,
-        accountType: params.accountType,
-        expiresAt: Date.now() + 15 * 60 * 1000
-      }))
-    } catch {
-      // Storage unavailable
+    return {
+      data: {
+        email,
+        user: signInData?.user || createdUser,
+        session: signInData?.session || null,
+      },
+      error: signInError && !signInData?.session ? signInError : null,
     }
-    
-    try {
-      await (supabase as any).from('auth_otps').insert([{
-        email: params.email,
-        otp_code: otp,
-        type: 'signup',
-        metadata: {
-          password: params.password,
-          full_name: params.fullName,
-          account_type: params.accountType
-        }
-      }])
-    } catch {
-      // Ignore if auth_otps table is not created yet
-    }
-
-    // 3. Send the OTP code via EmailJS to the user's Gmail inbox
-    await emailService.sendOTPEmail(params.email, otp, 'signup')
-    
-    return { data: { email: params.email }, error: null }
   },
 
   async requestPasswordReset(email: string) {
