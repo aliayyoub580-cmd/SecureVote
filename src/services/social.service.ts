@@ -264,7 +264,14 @@ export const socialProfilesService = {
   },
 
   async uploadAvatar(userId: string, file: File): Promise<string> {
-    const ext  = file.name.split('.').pop()
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validImageTypes.includes(file.type)) {
+      throw new Error('Invalid image format. Only JPEG, PNG, and WebP are allowed.')
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('Image size must be less than 5MB.')
+    }
+    const ext  = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const path = `${userId}/avatar.${ext}`
     const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
     if (error) throw error
@@ -274,7 +281,14 @@ export const socialProfilesService = {
   },
 
   async uploadBanner(userId: string, file: File): Promise<string> {
-    const ext  = file.name.split('.').pop()
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validImageTypes.includes(file.type)) {
+      throw new Error('Invalid image format. Only JPEG, PNG, and WebP are allowed.')
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('Banner size must be less than 5MB.')
+    }
+    const ext  = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const path = `${userId}/banner.${ext}`
     const { error } = await supabase.storage.from('banners').upload(path, file, { upsert: true })
     if (error) throw error
@@ -388,7 +402,14 @@ export const socialSearchService = {
 
 export const socialMediaService = {
   async uploadPostImage(userId: string, postId: string, file: File, order: number): Promise<string> {
-    const ext  = file.name.split('.').pop()
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!validImageTypes.includes(file.type)) {
+      throw new Error('Invalid post image format. Allowed formats: JPEG, PNG, WebP, GIF.')
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('Post image size must be less than 10MB.')
+    }
+    const ext  = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const path = `${userId}/${postId}/${Date.now()}_${order}.${ext}`
     const { error } = await supabase.storage.from('post-images').upload(path, file)
     if (error) throw error
@@ -401,13 +422,20 @@ export const socialMediaService = {
   },
 
   async uploadPostPdf(userId: string, postId: string, file: File): Promise<string> {
+    const isDoc = file.name.match(/\.(pdf|doc|docx)$/i)
+    if (!isDoc) {
+      throw new Error('Invalid document format. Allowed formats: PDF, DOC, DOCX.')
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      throw new Error('Document size must be less than 25MB.')
+    }
     const cleanName = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')
     const path = `${userId}/${postId}/${Date.now()}_${cleanName}`
     const { error } = await supabase.storage.from('post-pdfs').upload(path, file)
     if (error) throw error
     await supabase.from('post_media').insert({
       post_id: postId, media_type: 'pdf', storage_path: path,
-      file_name: file.name, file_size: file.size, mime_type: 'application/pdf', display_order: 0,
+      file_name: file.name, file_size: file.size, mime_type: file.type || 'application/pdf', display_order: 0,
     })
     return path
   },

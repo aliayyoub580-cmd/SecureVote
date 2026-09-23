@@ -19,7 +19,7 @@ interface SocialHeaderProps {
 }
 
 export function SocialHeader({ onOpenComposer }: SocialHeaderProps) {
-  const { user, profile } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const { resolved, setTheme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
@@ -159,7 +159,7 @@ export function SocialHeader({ onOpenComposer }: SocialHeaderProps) {
                   <Link to={ROUTES.dashboard}>Return to Portal</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-[#0F4A5E]" />
-                <DropdownMenuItem className="text-rose-400 focus:bg-rose-500/10 focus:text-rose-400 rounded-lg cursor-pointer text-xs" onClick={() => void supabase.auth.signOut()}>
+                <DropdownMenuItem className="text-rose-400 focus:bg-rose-500/10 focus:text-rose-400 rounded-lg cursor-pointer text-xs" onClick={() => void signOut()}>
                   Log Out
                 </DropdownMenuItem>
               </DropdownMenuContent>

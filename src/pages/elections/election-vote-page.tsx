@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { electionsService } from '@/services/elections.service'
 import { voterRegistrationService } from '@/services/voter-registration.service'
 import { votesService } from '@/services/votes.service'
+import { savedVoterCodesService } from '@/services/saved-voter-codes.service'
 import { useAuth } from '@/contexts/auth-context'
 import { ROUTES } from '@/constants/routes'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -75,12 +76,14 @@ export function ElectionVotePage() {
         setIsRegistered(regStatus.hasBallot)
         setHasVoted(voted)
         
-        // Mock actual code for validation based on profile
-        const code = formatSimpleVotingCode(profile.id + id)
+        // Retrieve saved code for this election if available
+        const saved = savedVoterCodesService.getVoterCode(id, profile.id)
+        const code = saved || formatSimpleVotingCode(profile.id + id)
         setActualCode(code)
-        // In a real system, the user inputs their code, and we use the real secret token for `votesService.submitVote`.
-        // We'll use a mocked token if we can't retrieve the original one easily.
-        setSecretToken(profile.id + id)
+        setSecretToken(saved || (profile.id + id))
+        if (saved) {
+          setInputCode(saved)
+        }
         
       } catch (e) {
         setError('System error. Please try again.')
@@ -95,7 +98,7 @@ export function ElectionVotePage() {
       setCodeVerified(true)
       toast.success('Code verified successfully.')
     } else {
-      toast.error('Invalid voting code. Please check your email.')
+      toast.error('Invalid voting code. Please check your saved ID.')
     }
   }
 
@@ -195,7 +198,7 @@ export function ElectionVotePage() {
              </div>
              <div>
                <h2 className="text-lg sm:text-xl font-semibold text-white">Enter Voting Code</h2>
-               <p className="text-sm text-zinc-400 mt-2">Please enter the voting code that was sent to your email.</p>
+               <p className="text-sm text-zinc-400 mt-2">Please enter the Voting ID saved when you joined this election.</p>
              </div>
              <div className="space-y-4">
                 <Input 
@@ -209,7 +212,7 @@ export function ElectionVotePage() {
                 </Button>
              </div>
              <p className="text-xs text-zinc-500">
-               For testing purposes, your code is: <strong>{actualCode}</strong>
+               Your saved Voting ID is: <strong>{actualCode}</strong>
              </p>
           </div>
         ) : (

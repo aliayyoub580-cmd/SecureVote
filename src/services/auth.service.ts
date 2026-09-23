@@ -100,7 +100,8 @@ export const authService = {
     // 2. Ensure public.profiles record is correctly populated
     if (userId) {
       try {
-        const role = params.accountType === 'request_creator' ? 'election_creator' : 'voter'
+        // Users requesting creator status remain voters with 'pending' status until super admin approves
+        const role = 'voter'
         const creatorStatus = params.accountType === 'request_creator' ? 'pending' : 'none'
         await supabase.from('profiles').upsert(
           {
@@ -153,6 +154,8 @@ export const authService = {
   },
 
   async updatePassword(newPassword: string) {
+    const { data, error } = await supabase.auth.updateUser({ password: newPassword })
+    if (!error) return { data, error: null }
     return (supabase as any).rpc('reset_password_with_token', {
       p_token: 'manual-reset', 
       p_new_password: newPassword

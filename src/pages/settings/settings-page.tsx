@@ -85,9 +85,20 @@ export function SettingsPage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !user) return
+
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validImageTypes.includes(file.type)) {
+      toast.error('Only JPEG, PNG, and WebP images are allowed.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB.')
+      return
+    }
+
     setUploadingAvatar(true)
     try {
-      const ext = file.name.split('.').pop()
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
       const path = `${user.id}/${Date.now()}.${ext}`
       const { error: upErr } = await supabase.storage.from('avatars').upload(path, file)
       if (upErr) throw upErr

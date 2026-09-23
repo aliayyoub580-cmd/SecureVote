@@ -1,9 +1,41 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || 'https://qiwjfxlpxrevadflbsxr.supabase.co';
-const SERVICE_ROLE_KEY = process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+function getEnv(key) {
+  if (process.env[key]) return process.env[key];
+  try {
+    const envFile = path.resolve(process.cwd(), '.env');
+    if (fs.existsSync(envFile)) {
+      const content = fs.readFileSync(envFile, 'utf8');
+      for (const line of content.split('\n')) {
+        const [k, ...v] = line.split('=');
+        if (k && k.trim() === key) return v.join('=').trim();
+      }
+    }
+  } catch {}
+  return undefined;
+}
+
+const SUPABASE_URL = getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL') || 'https://qiwjfxlpxrevadflbsxr.supabase.co';
+const SERVICE_ROLE_KEY = getEnv('SUPABASE_SERVICE_ROLE_KEY') || getEnv('VITE_SUPABASE_SERVICE_ROLE_KEY');
 
 export default async function handler(req, res) {
+  // Ensure Express-like methods exist on res in any environment
+  if (!res.status) {
+    res.status = function (code) {
+      this.statusCode = code;
+      return this;
+    };
+  }
+  if (!res.json) {
+    res.json = function (data) {
+      this.setHeader('Content-Type', 'application/json');
+      this.end(JSON.stringify(data));
+      return this;
+    };
+  }
+
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -80,7 +112,8 @@ export default async function handler(req, res) {
     // 2. Ensure profile exists in public.profiles
     if (userId) {
       try {
-        const role = accountType === 'request_creator' ? 'election_creator' : 'voter';
+        // Never grant election_creator immediately; user stays voter until super admin reviews and approves
+        const role = 'voter';
         const creatorStatus = accountType === 'request_creator' ? 'pending' : 'none';
         await supabaseAdmin.from('profiles').upsert(
           {

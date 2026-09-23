@@ -35,6 +35,7 @@ import { cn } from '@/lib/utils'
 import { electionsService } from '@/services/elections.service'
 import { pollsService } from '@/services/polls.service'
 import { votesService } from '@/services/votes.service'
+import { savedVoterCodesService } from '@/services/saved-voter-codes.service'
 import type { Database } from '@/types/database'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -69,6 +70,7 @@ export function VotePage() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [savedCode, setSavedCode] = useState<string | null>(null)
 
   const form = useForm<Form>({ resolver: zodResolver(voteBallotSchema), defaultValues: { secretToken: '' } })
 
@@ -101,6 +103,14 @@ export function VotePage() {
       setPicks(init)
       setComments(initComments)
 
+      const storedCode = savedVoterCodesService.getVoterCode(id, user?.id)
+      if (storedCode) {
+        setSavedCode(storedCode)
+        if (!form.getValues('secretToken')) {
+          form.setValue('secretToken', storedCode)
+        }
+      }
+
       if (user?.id) {
         try {
           const used = await votesService.ballotUsed(id, user.id)
@@ -115,7 +125,7 @@ export function VotePage() {
     return () => {
       cancelled = true
     }
-  }, [id, user?.id])
+  }, [id, user?.id, form])
 
   const byPoll = useMemo(() => {
     const map = new Map<string, { poll: Poll; candidates: Candidate[] }>()
@@ -393,15 +403,38 @@ export function VotePage() {
                       <CardTitle className="text-2xl font-bold text-foreground tracking-tight">Enter Voting Code</CardTitle>
                     </div>
                     <p className="text-muted-foreground font-medium leading-relaxed text-base">
-                      To cast your vote, please enter your unique **Voting Code** provided during registration. 
-                      <span className="block mt-2 text-primary font-bold text-sm underline decoration-primary/30 underline-offset-4">
-                        Check your email or system notifications for your secure code.
+                      To cast your vote, please enter your unique **Voting Code** provided when you joined this election. 
+                      <span className="block mt-2 text-emerald-400 font-bold text-sm">
+                        Email delivery has been stopped. Use the Voting ID saved when you registered.
                       </span>
                     </p>
                   </div>
                   <div className="w-full lg:w-96 space-y-4 bg-muted/20 p-6 rounded-3xl border border-border/50">
                     <div className="space-y-3">
-                      <Label htmlFor="secret" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Voting Code Authorization</Label>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="secret" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Voting Code Authorization</Label>
+                        {savedCode && (
+                          <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                            <ShieldCheck className="size-3" /> Saved on device
+                          </span>
+                        )}
+                      </div>
+
+                      {savedCode && (
+                        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+                          <span className="font-mono font-bold tracking-wider text-emerald-400">{savedCode}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-[10px] text-emerald-400 hover:text-emerald-300 font-black uppercase tracking-wider"
+                            onClick={() => form.setValue('secretToken', savedCode, { shouldValidate: true })}
+                          >
+                            Use Saved ID
+                          </Button>
+                        </div>
+                      )}
+
                       <Input
                         id="secret"
                         autoComplete="off"
@@ -417,13 +450,13 @@ export function VotePage() {
                         {form.formState.errors.secretToken ? (
                           <p className="text-[9px] font-black text-[var(--accent-danger)] uppercase tracking-widest animate-pulse">Invalid Code Format</p>
                         ) : (
-                          <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">Enter your secure voting ID sent to your email</p>
+                          <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">Enter the ID saved with this election</p>
                         )}
                         <Link 
                           to={ROUTES.electionDetail(id)} 
                           className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline decoration-primary/30 underline-offset-4"
                         >
-                          Forgot Code?
+                          View Election
                         </Link>
                       </div>
                     </div>

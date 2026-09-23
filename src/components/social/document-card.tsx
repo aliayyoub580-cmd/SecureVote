@@ -2,6 +2,7 @@ import * as React from 'react'
 import { FileText, ZoomIn, Loader2 } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
+import DOMPurify from 'dompurify'
 import { supabase } from '@/lib/supabase/client'
 import { socialMediaService } from '@/services/social.service'
 import { DocumentViewerModal } from './document-viewer-modal'
@@ -190,7 +191,7 @@ export function DocumentCard({ media }: DocumentCardProps) {
         ) : docxHtml ? (
           /* DOCX Formatted Paper Sheet */
           <div className="w-full bg-white text-slate-900 p-6 sm:p-8 overflow-hidden prose prose-slate text-xs leading-relaxed font-serif max-h-[400px]">
-            <div dangerouslySetInnerHTML={{ __html: docxHtml }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(docxHtml) }} />
           </div>
         ) : (
           /* Fallback */

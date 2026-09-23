@@ -25,13 +25,11 @@ export function RoleGuard({ allow }: { allow: UserRole[] }) {
   }
 
   if (!profile || !allow.includes(profile.role)) {
-    // Only show the error toast when the user IS authenticated but lacks the required role.
-    // If profile is null, they are not logged in — redirect silently.
     if (profile) {
       toast.error('You do not have access to that area.')
+      return <Navigate to={getRoleDashboard(profile.role)} replace />
     }
-    // Always redirect to the user's own dashboard — never bleed into another role's area.
-    return <Navigate to={getRoleDashboard(profile?.role)} replace />
+    return <Navigate to={ROUTES.login} replace />
   }
 
   return <Outlet />

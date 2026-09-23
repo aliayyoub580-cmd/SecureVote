@@ -10,13 +10,16 @@ import {
   Clock,
   AlertCircle,
   Users,
-  Filter
+  Filter,
+  Key,
+  Copy
 } from 'lucide-react'
 
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/lib/toast'
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +32,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { ROUTES } from '@/constants/routes'
 import { electionsService } from '@/services/elections.service'
 import { votesService } from '@/services/votes.service'
+import { savedVoterCodesService } from '@/services/saved-voter-codes.service'
 import { isRegistrationOpen, isRegistrationUpcoming } from '@/lib/election-utils'
 import type { Database } from '@/types/database'
 
@@ -333,6 +337,35 @@ export function MyVotesPage() {
                          {election.description || 'No description provided.'}
                        </p>
                      </div>
+
+                     {/* Saved Voting ID if available */}
+                     {(() => {
+                       const savedCode = savedVoterCodesService.getVoterCode(election.id, profile?.id)
+                       if (!savedCode) return null
+                       return (
+                         <div className="p-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between gap-2 text-xs">
+                           <div className="flex items-center gap-1.5 min-w-0">
+                             <Key className="size-3.5 text-amber-500 shrink-0" />
+                             <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider shrink-0">ID:</span>
+                             <code className="font-mono font-bold text-emerald-400 text-xs tracking-wider truncate select-all">{savedCode}</code>
+                           </div>
+                           <Button
+                             type="button"
+                             variant="ghost"
+                             size="icon"
+                             className="size-6 text-zinc-400 hover:text-white shrink-0"
+                             onClick={async (e) => {
+                               e.stopPropagation()
+                               await navigator.clipboard.writeText(savedCode)
+                               toast.success(`Copied ID for ${election.title}!`)
+                             }}
+                             title="Copy Voting ID"
+                           >
+                             <Copy className="size-3" />
+                           </Button>
+                         </div>
+                       )
+                     })()}
 
                      {/* Deadlines */}
                      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[var(--border)]">

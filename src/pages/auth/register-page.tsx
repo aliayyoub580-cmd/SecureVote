@@ -108,7 +108,7 @@ export function RegisterPage() {
 
     let destination = ROUTES.dashboard
     if (values.accountType === 'request_creator') {
-      destination = ROUTES.creatorDashboard
+      destination = ROUTES.accountCreatorStatus
     }
 
     if (data?.session) {

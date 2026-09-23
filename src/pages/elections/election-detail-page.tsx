@@ -8,7 +8,12 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Key
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -23,7 +28,8 @@ import { votesService } from '@/services/votes.service'
 import type { Database } from '@/types/database'
 import { toast } from '@/lib/toast'
 import { isRegistrationOpen } from '@/lib/election-utils'
-import { emailService } from '@/services/email.service'
+import { savedVoterCodesService } from '@/services/saved-voter-codes.service'
+import { SaveVoterIdDialog } from '@/components/voting/save-voter-id-dialog'
 
 type Election = Database['public']['Tables']['elections']['Row']
 type Candidate = Database['public']['Tables']['election_candidates']['Row']
@@ -61,6 +67,9 @@ export function ElectionDetailPage() {
   const [hasVoted, setHasVoted] = useState(false)
   const [votingCode, setVotingCode] = useState<string | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
+  const [showSaveIdDialog, setShowSaveIdDialog] = useState(false)
+  const [revealedCode, setRevealedCode] = useState(false)
+  const [copiedCode, setCopiedCode] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -90,7 +99,8 @@ export function ElectionDetailPage() {
             setIsWaitlisted(status.waitlistPosition)
             setHasVoted(voted)
             if (status.hasBallot) {
-              setVotingCode(formatSimpleVotingCode(profile.id + id))
+              const saved = savedVoterCodesService.getVoterCode(id, profile.id)
+              setVotingCode(saved || formatSimpleVotingCode(profile.id + id))
             }
           }
         }
@@ -128,26 +138,42 @@ export function ElectionDetailPage() {
 
         clearTimeout(timeoutId)
 
-        if (row.secret_token) {
+        const receivedCode = row.secret_token || row.voting_code
+        if (receivedCode) {
           setIsRegistered(true)
-          const code = row.secret_token
+          const code = String(receivedCode)
           setVotingCode(code)
-          toast.success('Registration successful!')
 
-          if (profile?.email && election?.title) {
-            void emailService.sendVotingCodeEmail(profile.email, election.title, code)
+          if (election?.title) {
+            savedVoterCodesService.saveVoterCode({
+              electionId: id,
+              electionTitle: election.title,
+              votingCode: code,
+              userId: profile.id,
+            })
           }
 
-          setTimeout(() => {
-            toast.success('Complete voting code sent to your email.')
-          }, 1500)
+          toast.success('Registration successful! Please save your Voting ID.')
+          setShowSaveIdDialog(true)
         } else if (row.status === 'waitlisted') {
           setIsWaitlisted(row.queue_position || 0)
           toast.success(`Added to waitlist (Position: ${row.queue_position || 0})`)
         } else {
           setIsRegistered(true)
-          setVotingCode(formatSimpleVotingCode(profile.id + id))
-          toast.success('Registration successful!')
+          const fallback = formatSimpleVotingCode(profile.id + id)
+          setVotingCode(fallback)
+
+          if (election?.title) {
+            savedVoterCodesService.saveVoterCode({
+              electionId: id,
+              electionTitle: election.title,
+              votingCode: fallback,
+              userId: profile.id,
+            })
+          }
+
+          toast.success('Registration successful! Please save your Voting ID.')
+          setShowSaveIdDialog(true)
         }
       } else {
         clearTimeout(timeoutId)
@@ -292,12 +318,59 @@ export function ElectionDetailPage() {
                 </div>
               ) : isRegistered ? (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-[var(--muted)] border border-[var(--border)] text-center space-y-2">
-                    <ShieldCheck className="size-6 text-emerald-500 mx-auto" />
-                    <p className="text-sm font-medium text-[var(--foreground)]">Registration Confirmed</p>
-                    <p className="text-xs text-[var(--muted-foreground)]">
-                      Your voting code: {votingCode ? maskVotingCode(votingCode) : 'Sent to email'}
-                    </p>
+                  <div className="p-4 rounded-2xl bg-zinc-900/60 border border-emerald-500/20 text-center space-y-3 shadow-lg shadow-emerald-500/5">
+                    <ShieldCheck className="size-7 text-emerald-400 mx-auto" />
+                    <div>
+                      <p className="text-sm font-bold text-white">Registration Confirmed</p>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                        Saved with election: <span className="font-semibold text-zinc-200">{election.title}</span>
+                      </p>
+                    </div>
+
+                    {votingCode && (
+                      <div className="pt-2 border-t border-zinc-800/80 space-y-2">
+                        <div className="flex items-center justify-between bg-zinc-950/80 px-3 py-2 rounded-xl border border-zinc-800">
+                          <code className="font-mono text-xs sm:text-sm font-bold tracking-wider text-emerald-400 select-all">
+                            {revealedCode ? votingCode : maskVotingCode(votingCode)}
+                          </code>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-7 text-zinc-400 hover:text-white"
+                              onClick={() => setRevealedCode(!revealedCode)}
+                              title={revealedCode ? 'Hide ID' : 'Reveal ID'}
+                            >
+                              {revealedCode ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-7 text-zinc-400 hover:text-white"
+                              onClick={async () => {
+                                await navigator.clipboard.writeText(votingCode)
+                                setCopiedCode(true)
+                                toast.success('Voting ID copied!')
+                                setTimeout(() => setCopiedCode(false), 2000)
+                              }}
+                              title="Copy ID"
+                            >
+                              {copiedCode ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+                            </Button>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="h-7 text-[10px] text-primary hover:text-primary/90 font-bold uppercase tracking-wider w-full justify-center"
+                          onClick={() => setShowSaveIdDialog(true)}
+                        >
+                          View / Save ID Card
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <Button className="btn-primary w-full" asChild>
                     <Link to={ROUTES.electionVote(id!)}>Proceed to Vote</Link>
@@ -353,6 +426,15 @@ export function ElectionDetailPage() {
           </Card>
         </motion.div>
       </div>
+
+      {votingCode && (
+        <SaveVoterIdDialog
+          open={showSaveIdDialog}
+          onOpenChange={setShowSaveIdDialog}
+          electionTitle={election.title}
+          votingCode={votingCode}
+        />
+      )}
     </motion.div>
   )
 }

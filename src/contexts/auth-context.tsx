@@ -26,10 +26,14 @@ const AuthContext = React.createContext<AuthContextValue | null>(null)
 
 function getFallbackProfile(user: User): Profile {
   let role: 'super_admin' | 'election_creator' | 'voter' = 'voter'
+  let creator_application_status: 'none' | 'pending' | 'approved' | 'rejected' = 'none'
+
   if (user.email?.toLowerCase() === 'admin@gmail.com') {
     role = 'super_admin'
   } else if (user.user_metadata?.account_type === 'request_creator') {
-    role = 'election_creator'
+    // Never escalate role to election_creator until verified by admin approval in the database
+    role = 'voter'
+    creator_application_status = 'pending'
   }
 
   return {
@@ -41,7 +45,7 @@ function getFallbackProfile(user: User): Profile {
     updated_at: new Date().toISOString(),
     phone: null,
     organization: null,
-    creator_application_status: role === 'election_creator' ? 'approved' : 'none',
+    creator_application_status,
     creator_application_rejection_reason: null,
   }
 }
@@ -97,10 +101,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return
       clearTimeout(safetyTimer)
       const user = session?.user ?? null
+
+      if (event === 'SIGNED_OUT' || !session) {
+        setState({
+          session: null,
+          user: null,
+          profile: null,
+          loading: false,
+          sessionValidated: true,
+        })
+        const publicPaths = ['/login', '/register', '/landing', '/auth', '/social']
+        const isPublic = publicPaths.some(p => window.location.pathname.startsWith(p)) || window.location.pathname === '/'
+        if (!isPublic) {
+          window.location.replace('/login')
+        }
+        return
+      }
+
       setState((s) => ({
         ...s,
         session,
@@ -110,10 +131,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }))
     })
 
+    // Handle back-forward cache (BFCache) navigation & revalidation
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        void supabase.auth.getSession().then(({ data: { session } }) => {
+          if (!session) {
+            setState({
+              session: null,
+              user: null,
+              profile: null,
+              loading: false,
+              sessionValidated: true,
+            })
+            const publicPaths = ['/login', '/register', '/landing', '/auth', '/social']
+            const isPublic = publicPaths.some(p => window.location.pathname.startsWith(p)) || window.location.pathname === '/'
+            if (!isPublic) {
+              window.location.replace('/login')
+            }
+          }
+        })
+      }
+    }
+    window.addEventListener('pageshow', handlePageShow)
+
     return () => {
       mounted = false
       clearTimeout(safetyTimer)
       subscription.unsubscribe()
+      window.removeEventListener('pageshow', handlePageShow)
     }
   }, [])
 
@@ -165,10 +210,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       /* still sign out */
     }
-    await supabase.auth.signOut()
-    localStorage.clear()
-    sessionStorage.clear()
-    window.location.replace('/login')
+
+    try {
+      await supabase.auth.signOut()
+    } catch {
+      /* ignore network errors */
+    } finally {
+      localStorage.clear()
+      sessionStorage.clear()
+      setState({
+        session: null,
+        user: null,
+        profile: null,
+        loading: false,
+        sessionValidated: true,
+      })
+      window.location.replace('/login')
+    }
   }, [])
 
   const isEmailVerified = Boolean(state.user)

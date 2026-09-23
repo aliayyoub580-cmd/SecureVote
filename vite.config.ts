@@ -13,10 +13,25 @@ function registerDevPlugin() {
             const chunks: Buffer[] = []
             for await (const chunk of req) chunks.push(chunk)
             req.body = JSON.parse(Buffer.concat(chunks).toString())
+            // Ensure standard response helper methods exist
+            if (!res.status) {
+              res.status = function (code: number) {
+                res.statusCode = code
+                return res
+              }
+            }
+            if (!res.json) {
+              res.json = function (data: any) {
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify(data))
+                return res
+              }
+            }
             const { default: handler } = await import('./api/register.js')
             await handler(req, res)
           } catch (e: any) {
             res.statusCode = 500
+            res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ error: e.message }))
           }
           return

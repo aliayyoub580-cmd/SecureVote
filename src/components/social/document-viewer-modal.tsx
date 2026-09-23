@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
+import DOMPurify from 'dompurify'
 
 // Set worker for PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
@@ -259,7 +260,7 @@ export function DocumentViewerModal({
             </div>
           ) : docxHtml ? (
             <div className="w-full max-w-3xl bg-white text-slate-900 p-8 sm:p-12 rounded-2xl shadow-2xl overflow-y-auto max-h-[80vh] prose prose-slate">
-              <div dangerouslySetInnerHTML={{ __html: docxHtml }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(docxHtml) }} />
             </div>
           ) : (
             <iframe

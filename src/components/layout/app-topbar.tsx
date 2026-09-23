@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils'
 import { NotificationPopover } from './notification-popover'
 
 export function AppTopbar() {
-  const { profile, user } = useAuth()
+  const { profile, user, signOut } = useAuth()
   const { resolved, setTheme } = useTheme()
   const location = useLocation()
 
@@ -117,7 +117,7 @@ export function AppTopbar() {
                   <Link to={ROUTES.settings}>Settings & Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-[var(--border)]" />
-                <DropdownMenuItem className="text-rose-500 focus:bg-rose-500/10 focus:text-rose-500 rounded-lg cursor-pointer" onClick={() => void supabase.auth.signOut()}>
+                <DropdownMenuItem className="text-rose-500 focus:bg-rose-500/10 focus:text-rose-500 rounded-lg cursor-pointer" onClick={() => void signOut()}>
                   Log Out
                 </DropdownMenuItem>
               </DropdownMenuContent>

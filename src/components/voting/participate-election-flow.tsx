@@ -27,6 +27,7 @@ import {
   mapRegistrationRpcError,
 } from '@/lib/voter-registration-utils'
 import { voterRegistrationService, type VoterRegisterResult } from '@/services/voter-registration.service'
+import { savedVoterCodesService } from '@/services/saved-voter-codes.service'
 import type { Database } from '@/types/database'
 import { cn } from '@/lib/utils'
 
@@ -83,12 +84,19 @@ export function ParticipateElectionFlow({
       const result = await voterRegistrationService.registerForElection(election.id, true)
       setConfirmOpen(false)
       setAcceptTerms(false)
+      if (result.status === 'confirmed' && result.secretToken) {
+        savedVoterCodesService.saveVoterCode({
+          electionId: election.id,
+          electionTitle: election.title,
+          votingCode: result.secretToken,
+        })
+      }
       onComplete(result)
       await onRefresh()
       if (result.status === 'waitlisted') {
         toast.success(`You are #${result.queuePosition} on the waitlist`)
       } else {
-        toast.success('Registration complete — save your secret token')
+        toast.success('Registration complete — ID saved with election!')
       }
     } catch (e) {
       const msg = mapRegistrationRpcError(e instanceof Error ? e.message : String(e))
